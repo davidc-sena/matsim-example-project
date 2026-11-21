@@ -76,17 +76,18 @@ def test_arrowhead_visible_when_rule_touches_function(app):
     win.close()
 
 
-def test_change_flow_to_entry(app):
+def test_entry_tool_sets_side(app):
+    from PySide6.QtCore import QPointF
     from idefsim.model import Model
     m = Model()
     e = m.add_element(EK.ENTITY, 0, 0)
-    f = m.add_element(EK.FUNCTION, 200, 0)
-    c = m.add_connection(CK.FLOW, e.id, f.id)
+    e.params["external_arrival"] = False
     win = MainWindow()
     win._set_model(m, None)
-    assert win.scene.set_connection_kind(c.id, CK.ENTRY)
-    assert win.scene.model.connections[c.id].kind == CK.ENTRY
+    assert win.scene.set_entry_arrow(e.id, QPointF(0, -20))   # clique acima
+    p = win.scene.model.elements[e.id].params
+    assert p["external_arrival"] and p["arrival_side"] == "top"
     win.undo()
-    assert next(iter(win.scene.model.connections.values())).kind == CK.FLOW
+    assert not win.scene.model.elements[e.id].params["external_arrival"]
     win.dirty = False
     win.close()

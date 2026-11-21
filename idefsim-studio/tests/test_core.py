@@ -85,29 +85,31 @@ def test_resource_below_control_above():
     assert len(msgs) == 1 and msgs[0].level == INFO
 
 
-def test_entry_flow():
+def test_entry_arrow_on_entity():
     m = Model()
     e = m.add_element(EK.ENTITY, interarrival="CONST(5)")
     f = m.add_element(EK.FUNCTION, duration="CONST(1)")
     x = m.add_element(EK.EXIT)
-    with pytest.raises(ConnectionError_):
-        m.add_connection(CK.ENTRY, f.id, x.id)       # só parte de entidade
+    assert e.params["external_arrival"] is True          # entidade nova chega de fora
     m.add_connection(CK.FLOW, e.id, f.id)
-    with pytest.raises(ConnectionError_):
-        m.add_connection(CK.ENTRY, e.id, f.id)       # duplicado (fluxo já existe)
-    m.connections.clear()
-    m.add_connection(CK.ENTRY, e.id, f.id)
     m.add_connection(CK.FLOW, f.id, x.id)
-    assert len(m.outgoing(e.id)) == 1                 # ENTRY conta como fluxo
     assert not [i for i in validate(m) if "Fluxo de entrada" in i.message]
-    m.settings.duration, m.settings.replications = 100, 1
-    rows = {(r.obj, r.metric): r.mean for r in run_simulation(m).rows()}
-    assert rows[("Fim 1", "Entidades")] >= 19
+    e.params["external_arrival"] = False
+    assert [i for i in validate(m) if "Fluxo de entrada" in i.message]
+    prod = m.add_element(EK.ENTITY)
+    m.add_connection(CK.FLOW, f.id, prod.id)             # entidade de transformação
+    assert prod.params["external_arrival"] is False
 
 
-def test_entry_suggested_for_plain_flow():
+def test_legacy_entry_connection_is_converted():
     m = Model()
     e = m.add_element(EK.ENTITY)
     f = m.add_element(EK.FUNCTION)
     m.add_connection(CK.FLOW, e.id, f.id)
-    assert [i for i in validate(m) if "Fluxo de entrada no sistema" in i.message]
+    d = m.to_dict()
+    d["connections"][0]["kind"] = "entry"
+    for ed in d["elements"]:
+        ed["params"].pop("external_arrival", None)
+    m2 = Model.from_dict(d)
+    c = next(iter(m2.connections.values()))
+    assert c.kind == CK.FLOW and m2.elements[e.id].params["external_arrival"] is True

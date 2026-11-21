@@ -102,7 +102,7 @@ class DiagramScene(QGraphicsScene):
         except ConnectionError_ as ex:
             self.message.emit(str(ex))
             return None
-        if kind in (CK.FLOW, CK.ENTRY):
+        if kind == CK.FLOW:
             outs = self.model.outgoing(c.source)
             if len(outs) > 1:  # distribui probabilidades igualmente
                 for o in outs:
@@ -114,20 +114,23 @@ class DiagramScene(QGraphicsScene):
         self.modelChanged.emit("Conectar elementos", "")
         return c
 
-    def set_connection_kind(self, cid: str, kind: CK) -> bool:
-        """Troca o tipo de uma ligação (ex.: fluxo comum ↔ fluxo de entrada)."""
-        c = self.model.connections[cid]
-        old = c.kind
-        c.kind = None  # ignora a própria ligação na verificação de duplicados
-        try:
-            self.model.check_connection(kind, c.source, c.target)
-        except ConnectionError_ as ex:
-            c.kind = old
-            self.message.emit(str(ex))
+    def set_entry_arrow(self, eid: str, pos: QPointF | None = None) -> bool:
+        """Coloca o fluxo de entrada no sistema na entidade, do lado mais próximo de ``pos``."""
+        e = self.model.elements[eid]
+        if e.kind != EK.ENTITY:
+            self.message.emit("O fluxo de entrada no sistema é colocado sobre uma Entidade.")
             return False
-        c.kind = kind
-        self.edges[cid].update()
-        self.modelChanged.emit("Tipo de ligação", "")
+        side = e.params.get("arrival_side", "left")
+        if pos is not None:
+            dx, dy = pos.x() - e.x, pos.y() - e.y
+            if abs(dx) >= abs(dy):
+                side = "left" if dx <= 0 else "right"
+            else:
+                side = "top" if dy < 0 else "bottom"
+        e.params["external_arrival"] = True
+        e.params["arrival_side"] = side
+        self.nodes[eid].refresh()
+        self.modelChanged.emit("Fluxo de entrada no sistema", "")
         return True
 
     def delete_selected(self) -> None:
@@ -174,6 +177,16 @@ class DiagramScene(QGraphicsScene):
         pos = ev.scenePos()
         if self.tool == "add":
             self.add_element(self.tool_kind, pos)
+            if not ev.modifiers() & Qt.ShiftModifier:
+                self.set_tool("select")
+                self.toolFinished.emit()
+            return
+        if self.tool == "entry":
+            node = self._node_at(pos)
+            if node is None or node.element.kind != EK.ENTITY:
+                self.message.emit("Clique sobre uma Entidade, do lado de onde ela chega ao sistema.")
+                return
+            self.set_entry_arrow(node.element.id, pos)
             if not ev.modifiers() & Qt.ShiftModifier:
                 self.set_tool("select")
                 self.toolFinished.emit()

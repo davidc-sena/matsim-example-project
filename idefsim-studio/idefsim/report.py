@@ -10,7 +10,10 @@ _PARAM_LABELS = {
     "interarrival": "Intervalo entre chegadas", "first_arrival": "Primeira chegada",
     "max_arrivals": "Máx. de chegadas (0 = ilimitado)", "batch_size": "Entidades por chegada",
     "duration": "Tempo", "capacity": "Capacidade",
+    "external_arrival": "Fluxo de entrada no sistema", "arrival_side": "Seta vem da",
 }
+_VALUE_LABELS = {True: "Sim", False: "Não", "left": "esquerda", "right": "direita",
+                 "top": "cima", "bottom": "baixo"}
 
 _ORDER = [EK.ENTITY, EK.FUNCTION, EK.MOVEMENT, EK.RESOURCE, EK.CONTROL,
           EK.RULE_AND, EK.RULE_OR, EK.RULE_ANDOR, EK.CONNECTOR, EK.EXIT, EK.NOTE]
@@ -45,8 +48,10 @@ def model_to_html(model: Model, diagram_svg: str | None = None) -> str:
         h.append(f"<h2>{KIND_LABELS[kind]} ({len(els)})</h2><table>"
                  "<tr><th>Nome</th><th>Parâmetros</th><th>Ligações</th><th>Descrição</th></tr>")
         for e in els:
-            params = "<br>".join(f"{_PARAM_LABELS.get(k, k)}: {escape(str(v))}"
-                                 for k, v in e.params.items())
+            params = "<br>".join(
+                f"{_PARAM_LABELS.get(k, k)}: {escape(str(_VALUE_LABELS.get(v, v)))}"
+                for k, v in e.params.items()
+                if not (k == "arrival_side" and not e.params.get("external_arrival")))
             links = []
             for c in model.outgoing(e.id):
                 p = f" (p={c.probability:g})" if len(model.outgoing(e.id)) > 1 else ""

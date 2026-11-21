@@ -2,10 +2,11 @@
 from __future__ import annotations
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtWidgets import (QComboBox, QDoubleSpinBox, QFormLayout, QLabel, QLineEdit,
+from PySide6.QtWidgets import (QCheckBox, QComboBox, QDoubleSpinBox, QFormLayout, QLabel, QLineEdit,
                                QPlainTextEdit, QScrollArea, QSpinBox, QVBoxLayout, QWidget)
 
 from .. import distributions as dist
+from . import shapes
 from ..model import (CONNECTION_LABELS, KIND_LABELS, Connection, ConnectionKind as CK,
                      Element, ElementKind as EK, Model, PROCESS_KINDS)
 
@@ -24,7 +25,6 @@ class _TextEdit(QPlainTextEdit):
 class PropertiesPanel(QScrollArea):
     edited = Signal(str, str)        # descrição, chave de agrupamento
     elementRenamed = Signal(str)     # id
-    kindChangeRequested = Signal(str, str)  # id da ligação, novo tipo
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -156,6 +156,20 @@ class PropertiesPanel(QScrollArea):
             self.form.addRow(QLabel(self._rule_help(e.kind)))
 
         if e.kind == EK.ENTITY:
+            ext = QCheckBox("Fluxo de entrada no sistema")
+            ext.setToolTip("Seta com dois traços antes da entidade: ela chega de fora do sistema.")
+            ext.setChecked(bool(e.params.get("external_arrival")))
+            ext.toggled.connect(set_param("external_arrival", "Fluxo de entrada", bool))
+            self.form.addRow("Chegada externa", ext)
+            side = QComboBox()
+            sides = list(shapes.SIDE_LABELS)
+            side.addItems([shapes.SIDE_LABELS[k] for k in sides])
+            side.setCurrentIndex(sides.index(e.params.get("arrival_side", "left")))
+            side.setEnabled(ext.isChecked())
+            ext.toggled.connect(side.setEnabled)
+            side.currentIndexChanged.connect(
+                lambda i: set_param("arrival_side", "Lado da chegada")(sides[i]))
+            self.form.addRow("Seta vem da", side)
             if model.incoming(e.id):
                 self.form.addRow(QLabel("<i>Entidade de transformação: as entidades que chegam "
                                         "passam a ser deste tipo.</i>"))
@@ -222,14 +236,5 @@ class PropertiesPanel(QScrollArea):
             self.elementRenamed.emit(c.source)
             self.edited.emit("Rótulo", f"{c.id}.label")
         self._line("Rótulo", c.label, set_label)
-        if c.kind in (CK.FLOW, CK.ENTRY) and s.kind == EK.ENTITY:
-            kind_box = QComboBox()
-            kinds = [CK.ENTRY, CK.FLOW]
-            for k in kinds:
-                kind_box.addItem(CONNECTION_LABELS[k])
-            kind_box.setCurrentIndex(kinds.index(c.kind))
-            kind_box.currentIndexChanged.connect(lambda i: self.kindChangeRequested.emit(c.id, kinds[i].value))
-            self.form.addRow("Tipo", kind_box)
-        if (c.kind in (CK.FLOW, CK.ENTRY) and len(model.outgoing(c.source)) > 1
-                or s.kind == EK.RULE_ANDOR):
+        if c.kind == CK.FLOW and len(model.outgoing(c.source)) > 1 or s.kind == EK.RULE_ANDOR:
             self._prob_row(model, c, "probabilidade")

@@ -181,8 +181,6 @@ def connection_icon(kind: CK, size: int = 32) -> QIcon:
         pts = [QPointF(size / 2, size - 3), QPointF(size / 2, 3)]
     elif kind == CK.CONTROL:     # de cima para baixo
         pts = [QPointF(size / 2, 3), QPointF(size / 2, size - 3)]
-    elif kind == CK.ENTRY:
-        pts = [QPointF(2, size / 2), QPointF(size - 3, size / 2)]
     else:
         pts = [QPointF(4, size - 6), QPointF(size - 5, 6)]
     draw_link(p, kind, pts, scale=0.8)
@@ -204,7 +202,6 @@ def _arrow_head(p: QPainter, tip: QPointF, frm: QPointF, size: float) -> None:
 
 LINK_STYLE = {
     CK.FLOW: (Qt.SolidLine, 1.6),
-    CK.ENTRY: (Qt.SolidLine, 1.6),
     CK.RESOURCE: (Qt.SolidLine, 1.2),
     CK.CONTROL: (Qt.DashLine, 1.2),
     CK.NOTE: (Qt.DotLine, 1.0),
@@ -223,11 +220,37 @@ def draw_link(p: QPainter, kind: CK, pts, color: QColor = INK, scale: float = 1.
     a, b = pts[0], pts[-1]
     if kind != CK.NOTE:  # recurso também tem uma só ponta, apontando para a função
         _arrow_head(p, b, pts[-2], hs)
-    if kind == CK.ENTRY:  # fluxo de entrada no sistema: dois traços perpendiculares na origem
-        nb = pts[1]
-        ang = math.atan2(nb.y() - a.y(), nb.x() - a.x())
-        ux, uy = math.cos(ang), math.sin(ang)
-        d = QPointF(-uy * 7 * scale, ux * 7 * scale)
-        for off in (8, 14):
-            m = QPointF(a.x() + ux * off * scale, a.y() + uy * off * scale)
-            p.drawLine(m - d, m + d)
+
+
+ENTRY_LENGTH = 46  # comprimento da seta de entrada no sistema
+SIDE_VECTORS = {"left": (-1, 0), "right": (1, 0), "top": (0, -1), "bottom": (0, 1)}
+SIDE_LABELS = {"left": "Esquerda", "top": "Cima", "bottom": "Baixo", "right": "Direita"}
+
+
+def draw_entry_arrow(p: QPainter, tip: QPointF, side: str = "left", color: QColor = INK,
+                     length: float = ENTRY_LENGTH, scale: float = 1.0) -> None:
+    """Fluxo de entrada no sistema: seta com dois traços que chega à entidade vinda de ``side``."""
+    vx, vy = SIDE_VECTORS.get(side, (-1, 0))
+    tail = QPointF(tip.x() + vx * length, tip.y() + vy * length)
+    p.setPen(QPen(color, 1.6 * scale, Qt.SolidLine, Qt.RoundCap))
+    p.drawLine(tail, tip)
+    _arrow_head(p, tip, tail, 10 * scale)
+    d = QPointF(-vy * 7 * scale, vx * 7 * scale)  # perpendicular
+    for off in (10, 16):
+        m = QPointF(tail.x() - vx * off * scale, tail.y() - vy * off * scale)
+        p.drawLine(m - d, m + d)
+
+
+def entry_icon(size: int = 32) -> QIcon:
+    pm = QPixmap(size, size)
+    pm.fill(Qt.transparent)
+    p = QPainter(pm)
+    p.setRenderHint(QPainter.Antialiasing)
+    r = size * 0.3
+    c = QPointF(size - r - 2, size / 2)
+    p.setPen(QPen(INK, 1.2))
+    p.setBrush(QBrush(FILL[EK.ENTITY]))
+    p.drawEllipse(c, r, r)
+    draw_entry_arrow(p, QPointF(c.x() - r, c.y()), "left", length=size - 2 * r - 3, scale=0.6)
+    p.end()
+    return QIcon(pm)

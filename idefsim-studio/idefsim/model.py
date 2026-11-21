@@ -4,7 +4,7 @@ Notação IDEF-SIM (Leal, Almeida & Montevechi, 2008), elementos suportados:
 
 * Entidade ............................ círculo
 * Função .............................. retângulo
-* Fluxo de entrada no sistema ......... seta com dois traços na origem
+* Fluxo de entrada no sistema ......... seta com dois traços que entra na entidade
 * Recurso ............................. abaixo da função, seta de baixo para cima
 * Controle ............................ acima da função, seta de cima para baixo
 * Movimentação ........................ seta larga (bloco)
@@ -37,7 +37,6 @@ class ElementKind(str, Enum):
 
 class ConnectionKind(str, Enum):
     FLOW = "flow"          # fluxo da entidade
-    ENTRY = "entry"        # fluxo de entrada no sistema modelado (entidade externa)
     RESOURCE = "resource"  # ligação recurso <-> função
     CONTROL = "control"    # controle -> função
     NOTE = "note"          # informação explicativa
@@ -59,13 +58,11 @@ KIND_LABELS: dict[ElementKind, str] = {
 
 CONNECTION_LABELS: dict[ConnectionKind, str] = {
     ConnectionKind.FLOW: "Fluxo da entidade",
-    ConnectionKind.ENTRY: "Fluxo de entrada no sistema",
     ConnectionKind.RESOURCE: "Ligação de recurso",
     ConnectionKind.CONTROL: "Ligação de controle",
     ConnectionKind.NOTE: "Ligação de nota",
 }
 
-FLOW_LIKE = {ConnectionKind.FLOW, ConnectionKind.ENTRY}
 RULE_KINDS = {ElementKind.RULE_AND, ElementKind.RULE_OR, ElementKind.RULE_ANDOR}
 PROCESS_KINDS = {ElementKind.FUNCTION, ElementKind.MOVEMENT}
 FLOW_SOURCES = {ElementKind.ENTITY, ElementKind.CONNECTOR} | PROCESS_KINDS | RULE_KINDS
@@ -73,7 +70,9 @@ FLOW_TARGETS = {ElementKind.ENTITY, ElementKind.EXIT, ElementKind.CONNECTOR} | P
 
 DEFAULT_PARAMS: dict[ElementKind, dict] = {
     ElementKind.ENTITY: {"interarrival": "EXPO(10)", "first_arrival": "0",
-                         "max_arrivals": 0, "batch_size": 1},
+                         "max_arrivals": 0, "batch_size": 1,
+                         # fluxo de entrada no sistema (seta com dois traços antes da entidade)
+                         "external_arrival": True, "arrival_side": "left"},
     ElementKind.FUNCTION: {"duration": "TRIA(4, 5, 6)"},
     ElementKind.MOVEMENT: {"duration": "CONST(2)"},
     ElementKind.RESOURCE: {"capacity": 1},
@@ -215,12 +214,7 @@ class Model:
         if source == target:
             raise ConnectionError_("Não é possível ligar um elemento a ele mesmo.")
         s, t = self.elements[source], self.elements[target]
-        if kind == ConnectionKind.ENTRY:
-            if s.kind != ElementKind.ENTITY:
-                raise ConnectionError_("O fluxo de entrada no sistema deve partir de uma Entidade.")
-            if t.kind not in FLOW_TARGETS - {ElementKind.ENTITY, ElementKind.EXIT}:
-                raise ConnectionError_(f"O fluxo de entrada não pode chegar a '{KIND_LABELS[t.kind]}'.")
-        elif kind == ConnectionKind.FLOW:
+        if kind == ConnectionKind.FLOW:
             if s.kind not in FLOW_SOURCES:
                 raise ConnectionError_(f"Um fluxo não pode partir de '{KIND_LABELS[s.kind]}'.")
             if t.kind not in FLOW_TARGETS:
@@ -241,8 +235,7 @@ class Model:
             if s.kind != ElementKind.NOTE:
                 raise ConnectionError_("A ligação de nota deve partir de uma Informação explicativa.")
         for c in self.connections.values():
-            same = c.kind == kind or (c.kind in FLOW_LIKE and kind in FLOW_LIKE)
-            if same and c.source == s.id and c.target == t.id:
+            if c.kind == kind and c.source == s.id and c.target == t.id:
                 raise ConnectionError_("Esta ligação já existe.")
         return s.id, t.id
 
@@ -251,20 +244,17 @@ class Model:
         source, target = self.check_connection(kind, source, target)
         c = Connection(new_id(), kind, source, target, label, probability)
         self.connections[c.id] = c
+        tgt = self.elements[target]
+        if kind == ConnectionKind.FLOW and tgt.kind == ElementKind.ENTITY:
+            # entidade que recebe fluxo é de transformação, não chega de fora do sistema
+            tgt.params["external_arrival"] = False
         return c
 
-    @staticmethod
-    def _kinds(kind: ConnectionKind) -> set:
-        # FLOW inclui o fluxo de entrada: ambos transportam entidades
-        return FLOW_LIKE if kind in FLOW_LIKE else {kind}
-
     def outgoing(self, element_id: str, kind: ConnectionKind = ConnectionKind.FLOW) -> list[Connection]:
-        ks = self._kinds(kind)
-        return [c for c in self.connections.values() if c.source == element_id and c.kind in ks]
+        return [c for c in self.connections.values() if c.source == element_id and c.kind == kind]
 
     def incoming(self, element_id: str, kind: ConnectionKind = ConnectionKind.FLOW) -> list[Connection]:
-        ks = self._kinds(kind)
-        return [c for c in self.connections.values() if c.target == element_id and c.kind in ks]
+        return [c for c in self.connections.values() if c.target == element_id and c.kind == kind]
 
     def resources_of(self, element_id: str) -> list[Element]:
         return [self.elements[c.source] for c in self.incoming(element_id, ConnectionKind.RESOURCE)]
@@ -291,10 +281,19 @@ class Model:
         for ed in d.get("elements", []):
             e = Element.from_dict(ed)
             m.elements[e.id] = e
+        legacy_entry = set()
         for cd in d.get("connections", []):
+            if cd.get("kind") == "entry":  # formato antigo: seta de entrada entre entidade e função
+                cd = dict(cd, kind=ConnectionKind.FLOW.value)
+                legacy_entry.add(cd["source"])
             c = Connection.from_dict(cd)
             if c.source in m.elements and c.target in m.elements:
                 m.connections[c.id] = c
+        raw = {ed["id"]: ed.get("params", {}) for ed in d.get("elements", [])}
+        for e in m.by_kind(ElementKind.ENTITY):
+            if "external_arrival" not in raw.get(e.id, {}):
+                # arquivos antigos: chegada externa = entidade sem fluxo de entrada
+                e.params["external_arrival"] = e.id in legacy_entry or not m.incoming(e.id)
         return m
 
     def clone(self) -> "Model":

@@ -90,8 +90,9 @@ LEGEND = [
     (EK.FUNCTION, "Função", "Local onde a entidade sofre uma ação (processamento, montagem, "
                             "inspeção, espera)."),
     (CK.FLOW, "Fluxo da entidade", "Direção do movimento da entidade entre elementos."),
-    (CK.ENTRY, "Fluxo de entrada no sistema", "Seta com dois traços: entrada de uma entidade "
-                                              "externa no sistema modelado (chegadas)."),
+    ("entry", "Fluxo de entrada no sistema", "Seta com dois traços que chega à entidade: ela vem "
+                                             "de fora do sistema modelado. Use a ferramenta da "
+                                             "paleta clicando sobre a entidade."),
     (EK.RESOURCE, "Recurso", "Elemento usado para executar a função (máquina, operador). "
                              "Fica abaixo da função, ligado por seta de baixo para cima."),
     (EK.CONTROL, "Controle", "Regra que governa a função (plano, ordem, política). "
@@ -123,7 +124,12 @@ class LegendDialog(QDialog):
         t.setEditTriggers(QTableWidget.NoEditTriggers)
         t.setWordWrap(True)
         for i, (k, name, desc) in enumerate(LEGEND):
-            icon = shapes.connection_icon(k, 40) if isinstance(k, CK) else shapes.element_icon(k, 40)
+            if k == "entry":
+                icon = shapes.entry_icon(40)
+            elif isinstance(k, CK):
+                icon = shapes.connection_icon(k, 40)
+            else:
+                icon = shapes.element_icon(k, 40)
             it = QTableWidgetItem()
             it.setIcon(icon)
             t.setItem(i, 0, it)

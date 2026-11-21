@@ -83,8 +83,6 @@ class MainWindow(QMainWindow):
         self.scene.toolFinished.connect(lambda: self.tool_actions["select"].setChecked(True))
         self.props.edited.connect(self._on_props_edited)
         self.props.elementRenamed.connect(self.scene.refresh_element)
-        self.props.kindChangeRequested.connect(
-            lambda cid, k: self.scene.set_connection_kind(cid, CK(k)) or self._on_selection())
 
         if path:
             self.open_file(path)
@@ -197,8 +195,10 @@ class MainWindow(QMainWindow):
                 EK.EXIT: "X", EK.CONNECTOR: "K", EK.NOTE: "N"}
         for kind in EK:
             add(kind.value, KIND_LABELS[kind], shapes.element_icon(kind), "add", kind, keys[kind])
+            if kind == EK.ENTITY:
+                add("entry", "Fluxo de entrada no sistema", shapes.entry_icon(), "entry", None, "Shift+E")
         tb.addSeparator()
-        lkeys = {CK.FLOW: "L", CK.ENTRY: "Shift+E", CK.RESOURCE: "Shift+R", CK.CONTROL: "Shift+C", CK.NOTE: "Shift+N"}
+        lkeys = {CK.FLOW: "L", CK.RESOURCE: "Shift+R", CK.CONTROL: "Shift+C", CK.NOTE: "Shift+N"}
         for ck in CK:
             add("link_" + ck.value, CONNECTION_LABELS[ck], shapes.connection_icon(ck), "link", ck, lkeys[ck])
 

@@ -58,9 +58,9 @@ def validate(model: Model) -> list[Issue]:
         if e.kind == EK.ENTITY and not ins:
             if not outs:
                 add(ERROR, f"{label} não tem fluxo de saída.", e.id)
-            elif not any(c.kind == CK.ENTRY for c in outs):
-                add(INFO, f"{label} entra no sistema por um fluxo comum; na notação IDEF-SIM use o "
-                          "'Fluxo de entrada no sistema' (seta com dois traços).", e.id)
+            if not e.params.get("external_arrival", True):
+                add(INFO, f"{label} gera chegadas mas não tem o 'Fluxo de entrada no sistema' "
+                          "(seta com dois traços antes da entidade).", e.id)
             for key, nm in (("interarrival", "intervalo entre chegadas"),
                             ("first_arrival", "primeira chegada")):
                 try:
@@ -126,9 +126,9 @@ def validate(model: Model) -> list[Issue]:
                     add(INFO, f"{label} está abaixo de '{f.name}'; na notação IDEF-SIM o controle "
                               "fica acima da função (seta de cima para baixo).", e.id)
 
-        if e.kind == EK.ENTITY and ins and any(c.kind == CK.ENTRY for c in outs):
-            add(WARNING, f"{label} recebe fluxos, mas sai por um 'Fluxo de entrada no sistema'; "
-                         "esse símbolo é para entidades vindas de fora do sistema.", e.id)
+        if e.kind == EK.ENTITY and ins and e.params.get("external_arrival"):
+            add(WARNING, f"{label} recebe fluxos do próprio modelo, mas tem a seta de entrada "
+                         "externa; esse símbolo é para entidades vindas de fora do sistema.", e.id)
 
         if e.kind == EK.EXIT and outs:
             add(ERROR, f"{label} não pode ter fluxos de saída.", e.id)

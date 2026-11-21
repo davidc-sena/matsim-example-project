@@ -72,7 +72,7 @@ python -m pytest
 ## Como modelar
 
 1. Escolha um símbolo na paleta (ou use o atalho) e clique no diagrama. **Shift** mantém a ferramenta ativa; **Esc** ou o botão direito volta a *Selecionar*.
-2. Para conectar dois elementos, escolha a ligação (*Fluxo*, *Fluxo de entrada*, *Recurso*, *Controle* ou *Nota*), clique na origem e depois no destino.
+2. Para conectar dois elementos, escolha a ligação (*Fluxo*, *Recurso*, *Controle* ou *Nota*), clique na origem e depois no destino.
 3. Edite os parâmetros no painel **Propriedades**. Sem nada selecionado, o painel mostra as propriedades do modelo (duração, aquecimento, replicações, unidade de tempo).
 4. **F7** valida o modelo e **F5** executa a simulação.
 
@@ -81,7 +81,7 @@ python -m pytest
 | Símbolo | Atalho | Interpretação na simulação |
 |---|---|---|
 | Entidade (círculo) | E | Sem fluxo de entrada é uma **fonte de chegadas** (intervalo, primeira chegada, lote, máximo). Com fluxo de entrada é uma **transformação**: a entidade passa a ser deste tipo. |
-| Fluxo de entrada no sistema (seta com dois traços) | Shift+E | Entrada de entidades externas no sistema modelado: liga a Entidade de chegada ao primeiro elemento. Na simulação comporta-se como um fluxo comum. |
+| Fluxo de entrada no sistema (seta com dois traços **antes** da entidade) | Shift+E | Indica que a entidade chega de fora do sistema. Clique sobre a entidade do lado de onde ela chega; o lado e a presença da seta também podem ser alterados nas Propriedades. Entidades que recebem fluxo do próprio modelo (transformação) não têm essa seta. |
 | Função (retângulo) | F | Captura 1 unidade de cada recurso ligado, processa durante o tempo definido e libera os recursos. Sem recurso, capacidade infinita. |
 | Recurso | R | Capacidade (n.º de unidades). Fica **abaixo** da função; a *Ligação de recurso* sobe e entra pela base da função. |
 | Controle | C | Documental. Fica **acima** da função; a *Ligação de controle* entra pelo topo da função. |

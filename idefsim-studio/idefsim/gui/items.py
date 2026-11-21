@@ -7,7 +7,7 @@ from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QColor, QFont, QPainterPath, QPainterPathStroker, QPen
 from PySide6.QtWidgets import QGraphicsItem
 
-from ..model import (FLOW_LIKE, Connection, ConnectionKind as CK, Element, ElementKind as EK,
+from ..model import (Connection, ConnectionKind as CK, Element, ElementKind as EK,
                      PROCESS_KINDS, RULE_KINDS)
 from . import shapes
 
@@ -44,10 +44,16 @@ class NodeItem(QGraphicsItem):
         for ed in self.edges:
             ed.adjust()
 
+    def has_entry_arrow(self) -> bool:
+        return self.element.kind == EK.ENTITY and bool(self.element.params.get("external_arrival"))
+
     def boundingRect(self) -> QRectF:
         r = self._rect.adjusted(-3, -3, 3, 3)
         if self.element.kind == EK.EXIT:
             r = r.adjusted(-40, 0, 40, 34)
+        if self.has_entry_arrow():
+            L = shapes.ENTRY_LENGTH + 4
+            r = r.adjusted(-L, -L, L, L)
         return r
 
     def shape(self) -> QPainterPath:
@@ -56,6 +62,12 @@ class NodeItem(QGraphicsItem):
     def paint(self, painter, option, widget=None):
         shapes.paint_node(painter, self.element.kind, self._rect, self.element.name,
                           self.isSelected())
+        if self.has_entry_arrow():
+            side = self.element.params.get("arrival_side", "left")
+            vx, vy = shapes.SIDE_VECTORS.get(side, (-1, 0))
+            rad = self._rect.width() / 2
+            color = shapes.SELECT if self.isSelected() else shapes.INK
+            shapes.draw_entry_arrow(painter, QPointF(vx * rad, vy * rad), side, color)
 
     def body_rect(self) -> QRectF:
         """Retângulo útil do símbolo em coordenadas de cena (corpo da seta na movimentação)."""
@@ -143,7 +155,7 @@ class EdgeItem(QGraphicsItem):
     def label_text(self) -> str:
         c = self.conn
         parts = [c.label] if c.label else []
-        if c.kind in FLOW_LIKE:
+        if c.kind == CK.FLOW:
             src = self.model.elements[c.source]
             n_out = len(self.model.outgoing(src.id))
             if (src.kind in (EK.RULE_OR, EK.RULE_ANDOR) or

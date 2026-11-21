@@ -14,7 +14,7 @@
   },
   "elements": [
     {
-      "id": "45650607f1",
+      "id": "a1a34f0465",
       "kind": "entity",
       "name": "Peça",
       "x": 60,
@@ -24,11 +24,13 @@
         "interarrival": "EXPO(6)",
         "first_arrival": "0",
         "max_arrivals": 0,
-        "batch_size": 1
+        "batch_size": 1,
+        "external_arrival": true,
+        "arrival_side": "left"
       }
     },
     {
-      "id": "43a2addb7c",
+      "id": "e16cf08f0a",
       "kind": "function",
       "name": "Usinar",
       "x": 220,
@@ -39,7 +41,7 @@
       }
     },
     {
-      "id": "de28d22017",
+      "id": "613a85df7d",
       "kind": "resource",
       "name": "Torno",
       "x": 220,
@@ -50,7 +52,7 @@
       }
     },
     {
-      "id": "ea0a4e2561",
+      "id": "6a05a047d5",
       "kind": "control",
       "name": "Plano de produção",
       "x": 220,
@@ -59,7 +61,7 @@
       "params": {}
     },
     {
-      "id": "05a9c4a811",
+      "id": "8ffefe96d1",
       "kind": "movement",
       "name": "Transportar",
       "x": 400,
@@ -70,7 +72,7 @@
       }
     },
     {
-      "id": "7592a9ef37",
+      "id": "fd16d10f72",
       "kind": "resource",
       "name": "Operador logístico",
       "x": 400,
@@ -81,7 +83,7 @@
       }
     },
     {
-      "id": "c0bbc3838a",
+      "id": "2c796f759f",
       "kind": "function",
       "name": "Inspecionar",
       "x": 580,
@@ -92,7 +94,7 @@
       }
     },
     {
-      "id": "d3ac3f33de",
+      "id": "2aabc1bc4e",
       "kind": "resource",
       "name": "Inspetor",
       "x": 580,
@@ -103,7 +105,7 @@
       }
     },
     {
-      "id": "e41cca983b",
+      "id": "d9fbf16b7a",
       "kind": "rule_or",
       "name": "X",
       "x": 720,
@@ -112,7 +114,7 @@
       "params": {}
     },
     {
-      "id": "8a0943a0c4",
+      "id": "b035bb2406",
       "kind": "exit",
       "name": "Expedição",
       "x": 860,
@@ -121,7 +123,7 @@
       "params": {}
     },
     {
-      "id": "bb28b2589c",
+      "id": "8d016f7431",
       "kind": "function",
       "name": "Retrabalhar",
       "x": 720,
@@ -132,7 +134,7 @@
       }
     },
     {
-      "id": "68d12428fa",
+      "id": "11477f709e",
       "kind": "note",
       "name": "Taxa de rejeição histórica: 10%",
       "x": 880,
@@ -143,98 +145,98 @@
   ],
   "connections": [
     {
-      "id": "f3501fd5a8",
-      "kind": "entry",
-      "source": "45650607f1",
-      "target": "43a2addb7c",
+      "id": "89b8b6e5db",
+      "kind": "flow",
+      "source": "a1a34f0465",
+      "target": "e16cf08f0a",
       "label": "",
       "probability": 1.0
     },
     {
-      "id": "5f07f8ad8e",
+      "id": "1293db6536",
       "kind": "flow",
-      "source": "43a2addb7c",
-      "target": "05a9c4a811",
+      "source": "e16cf08f0a",
+      "target": "8ffefe96d1",
       "label": "",
       "probability": 1.0
     },
     {
-      "id": "94f29e67a4",
+      "id": "df998bb58c",
       "kind": "flow",
-      "source": "05a9c4a811",
-      "target": "c0bbc3838a",
+      "source": "8ffefe96d1",
+      "target": "2c796f759f",
       "label": "",
       "probability": 1.0
     },
     {
-      "id": "82110e5bcf",
+      "id": "e05ea40653",
       "kind": "flow",
-      "source": "c0bbc3838a",
-      "target": "e41cca983b",
+      "source": "2c796f759f",
+      "target": "d9fbf16b7a",
       "label": "",
       "probability": 1.0
     },
     {
-      "id": "aca27a3957",
+      "id": "c20726afaf",
       "kind": "flow",
-      "source": "e41cca983b",
-      "target": "8a0943a0c4",
+      "source": "d9fbf16b7a",
+      "target": "b035bb2406",
       "label": "",
       "probability": 0.9
     },
     {
-      "id": "9a6eeb1711",
+      "id": "4c4f5d1ce9",
       "kind": "flow",
-      "source": "e41cca983b",
-      "target": "bb28b2589c",
+      "source": "d9fbf16b7a",
+      "target": "8d016f7431",
       "label": "",
       "probability": 0.1
     },
     {
-      "id": "990c00faf1",
+      "id": "4f3a14d661",
       "kind": "flow",
-      "source": "bb28b2589c",
-      "target": "c0bbc3838a",
+      "source": "8d016f7431",
+      "target": "2c796f759f",
       "label": "",
       "probability": 1.0
     },
     {
-      "id": "06d54e70b9",
+      "id": "ffda27ab9e",
       "kind": "resource",
-      "source": "de28d22017",
-      "target": "43a2addb7c",
+      "source": "613a85df7d",
+      "target": "e16cf08f0a",
       "label": "",
       "probability": 1.0
     },
     {
-      "id": "631db87c61",
+      "id": "856059b25f",
       "kind": "resource",
-      "source": "7592a9ef37",
-      "target": "05a9c4a811",
+      "source": "fd16d10f72",
+      "target": "8ffefe96d1",
       "label": "",
       "probability": 1.0
     },
     {
-      "id": "02f9f514fc",
+      "id": "ff5ab5a013",
       "kind": "resource",
-      "source": "d3ac3f33de",
-      "target": "c0bbc3838a",
+      "source": "2aabc1bc4e",
+      "target": "2c796f759f",
       "label": "",
       "probability": 1.0
     },
     {
-      "id": "b88118a94f",
+      "id": "69b942bfab",
       "kind": "control",
-      "source": "ea0a4e2561",
-      "target": "43a2addb7c",
+      "source": "6a05a047d5",
+      "target": "e16cf08f0a",
       "label": "",
       "probability": 1.0
     },
     {
-      "id": "04c1d8429c",
+      "id": "4ecc434023",
       "kind": "note",
-      "source": "68d12428fa",
-      "target": "e41cca983b",
+      "source": "11477f709e",
+      "target": "d9fbf16b7a",
       "label": "",
       "probability": 1.0
     }
