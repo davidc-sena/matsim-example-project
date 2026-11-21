@@ -3,13 +3,19 @@
 # - Em cada push que altere idefsim-studio/, os pacotes ficam disponíveis em
 #   "Actions" > execução > "Artifacts".
 # - Ao enviar uma tag "idefsim-v*" (ex.: idefsim-v0.1.0), é criado um Release
-#   público com os pacotes anexados.
+#   público com os pacotes anexados. O mesmo acontece ao rodar o workflow
+#   manualmente informando a "versao".
 # - Ao publicar um Release manualmente no GitHub, os pacotes também são anexados.
 # - Também pode ser executado manualmente (Actions > Run workflow).
 name: IDEF-SIM Studio - executáveis
 
 on:
   workflow_dispatch:
+    inputs:
+      versao:
+        description: "Versão a publicar como Release (ex.: 0.1.0). Deixe vazio para só compilar."
+        required: false
+        default: ""
   push:
     branches: ["**"]
     tags: ["idefsim-v*"]   # filtros de caminho não se aplicam a tags
@@ -117,7 +123,7 @@ jobs:
   release:
     name: Publicar Release
     needs: build
-    if: startsWith(github.ref, 'refs/tags/idefsim-v')
+    if: startsWith(github.ref, 'refs/tags/idefsim-v') || (github.event_name == 'workflow_dispatch' && inputs.versao != '')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -129,7 +135,7 @@ jobs:
         working-directory: .
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
+          TAG: ${{ inputs.versao != '' && format('idefsim-v{0}', inputs.versao) || github.ref_name }}
         run: |
           ls -la pacotes
           VERSAO="${TAG#idefsim-v}"
@@ -160,4 +166,4 @@ jobs:
             --repo "${{ github.repository }}" \
             --title "IDEF-SIM Studio ${VERSAO}" \
             --notes-file notas.md \
-            --verify-tag
+            --target "${{ github.sha }}"   # cria a tag se ainda não existir
