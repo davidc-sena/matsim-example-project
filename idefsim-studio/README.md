@@ -33,7 +33,9 @@ O workflow `.github/workflows/idefsim-studio.yml` compila automaticamente os exe
 em máquinas Windows, macOS e Linux do GitHub Actions:
 
 * **A cada push** que altere `idefsim-studio/`, os pacotes ficam em *Actions* → execução → *Artifacts*.
-* **Ao publicar um Release** no GitHub, os pacotes são anexados ao Release.
+* **Ao enviar uma tag de versão** (`git tag idefsim-v0.2.0 && git push origin idefsim-v0.2.0`),
+  é criado automaticamente um **Release público** com os quatro executáveis anexados.
+* Downloads da versão mais recente: <https://github.com/davidc-sena/matsim-example-project/releases>
 * Também é possível rodar manualmente em *Actions* → *IDEF-SIM Studio - executáveis* → *Run workflow*.
 
 | Sistema | Arquivo | Como instalar |

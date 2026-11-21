@@ -2,13 +2,17 @@
 #
 # - Em cada push que altere idefsim-studio/, os pacotes ficam disponíveis em
 #   "Actions" > execução > "Artifacts".
-# - Ao publicar um Release no GitHub, os pacotes são anexados ao Release.
+# - Ao enviar uma tag "idefsim-v*" (ex.: idefsim-v0.1.0), é criado um Release
+#   público com os pacotes anexados.
+# - Ao publicar um Release manualmente no GitHub, os pacotes também são anexados.
 # - Também pode ser executado manualmente (Actions > Run workflow).
 name: IDEF-SIM Studio - executáveis
 
 on:
   workflow_dispatch:
   push:
+    branches: ["**"]
+    tags: ["idefsim-v*"]   # filtros de caminho não se aplicam a tags
     paths:
       - "idefsim-studio/**"
       - ".github/workflows/idefsim-studio.yml"
@@ -109,3 +113,51 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release upload "${{ github.event.release.tag_name }}" "${{ matrix.package }}" --clobber
+
+  release:
+    name: Publicar Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/idefsim-v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: pacotes
+          merge-multiple: true
+
+      - name: Criar Release com os executáveis
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          ls -la pacotes
+          VERSAO="${TAG#idefsim-v}"
+          cat > notas.md <<NOTAS
+          ## IDEF-SIM Studio ${VERSAO}
+
+          Ferramenta desktop para criar, documentar, validar e simular modelos conceituais na técnica **IDEF-SIM** (simulação a eventos discretos).
+
+          ### Downloads
+
+          | Sistema | Arquivo |
+          |---|---|
+          | Windows 10/11 (64 bits) | \`IDEF-SIM-Studio-windows-x64.zip\` |
+          | macOS com chip Apple (M1–M4) | \`IDEF-SIM-Studio-macos-arm64.dmg\` |
+          | macOS Intel | \`IDEF-SIM-Studio-macos-x64.dmg\` |
+          | Linux 64 bits (Ubuntu 22.04+ e similares) | \`IDEF-SIM-Studio-linux-x64.tar.gz\` |
+
+          ### Como instalar
+
+          - **Windows:** extraia o .zip e execute \`IDEF-SIM Studio.exe\`. Se o SmartScreen avisar, clique em *Mais informações* → *Executar assim mesmo*.
+          - **macOS:** abra o .dmg e arraste o app para *Aplicativos*. Na primeira vez, clique com o botão direito no app → *Abrir* → *Abrir*.
+          - **Linux:** \`tar -xzf IDEF-SIM-Studio-linux-x64.tar.gz\` e execute \`IDEF-SIM Studio/IDEF-SIM Studio\`.
+
+          Os executáveis não têm assinatura digital paga; por isso o sistema pode mostrar um aviso na primeira execução.
+          NOTAS
+          sed -i 's/^          //' notas.md
+          gh release create "$TAG" pacotes/* \
+            --repo "${{ github.repository }}" \
+            --title "IDEF-SIM Studio ${VERSAO}" \
+            --notes-file notas.md \
+            --verify-tag
