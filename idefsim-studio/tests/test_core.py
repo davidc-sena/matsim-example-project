@@ -73,3 +73,13 @@ def test_simulation_examples_run():
     assert rows2[("Produto", "Saídas")] > 0
     assert rows2[("Global", "Entidades consumidas em junções")] > 0
     assert "Categoria;Objeto" in r2.to_csv()
+
+
+def test_resource_below_control_above():
+    from idefsim.validation import INFO
+    m = usinagem_inspecao()
+    assert not [i for i in validate(m) if "notação IDEF-SIM" in i.message]
+    torno = next(e for e in m.elements.values() if e.name == "Torno")
+    torno.y = 0  # acima da função
+    msgs = [i for i in validate(m) if "notação IDEF-SIM" in i.message]
+    assert len(msgs) == 1 and msgs[0].level == INFO

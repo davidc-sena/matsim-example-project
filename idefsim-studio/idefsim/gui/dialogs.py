@@ -92,9 +92,9 @@ LEGEND = [
     (CK.FLOW, "Fluxo da entidade", "Direção do movimento da entidade entre elementos. "
                                    "O traço na origem marca a entrada no sistema."),
     (EK.RESOURCE, "Recurso", "Elemento usado para executar a função (máquina, operador). "
-                             "É ligado à função por uma seta dupla."),
+                             "Fica abaixo da função, ligado por seta dupla de baixo para cima."),
     (EK.CONTROL, "Controle", "Regra que governa a função (plano, ordem, política). "
-                             "É ligado à função por seta tracejada."),
+                             "Fica acima da função, ligado por seta de cima para baixo."),
     (EK.RULE_AND, "Regra E (&)", "Fluxos paralelos: divide a entidade em todos os ramos ou "
                                  "junta uma entidade de cada ramo."),
     (EK.RULE_OR, "Regra OU (X)", "Fluxos alternativos: apenas um dos caminhos é seguido."),

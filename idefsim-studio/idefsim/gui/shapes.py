@@ -132,7 +132,10 @@ def paint_node(p: QPainter, kind: EK, r: QRectF, name: str, selected: bool = Fal
         p.drawRect(r)
         p.setPen(QPen(SELECT if selected else INK, 1.2,
                       Qt.SolidLine if kind == EK.RESOURCE else Qt.DashLine))
-        p.drawLine(r.bottomLeft(), r.bottomRight())
+        if kind == EK.RESOURCE:
+            p.drawLine(r.topLeft(), r.topRight())
+        else:
+            p.drawLine(r.bottomLeft(), r.bottomRight())
         icon = QRectF(r.left(), r.top(), 16, r.height())
         cx = icon.center().x()
         if kind == EK.RESOURCE:  # seta dupla vertical
@@ -140,7 +143,7 @@ def paint_node(p: QPainter, kind: EK, r: QRectF, name: str, selected: bool = Fal
             for y, d in ((r.top() + 4, 1), (r.bottom() - 4, -1)):
                 p.drawLine(QPointF(cx, y), QPointF(cx - 4, y + 5 * d))
                 p.drawLine(QPointF(cx, y), QPointF(cx + 4, y + 5 * d))
-        else:  # seta tracejada para baixo
+        else:  # seta tracejada para baixo (controle entra por cima da função)
             p.drawLine(QPointF(cx, r.top() + 4), QPointF(cx, r.bottom() - 4))
             p.drawLine(QPointF(cx, r.bottom() - 4), QPointF(cx - 4, r.bottom() - 9))
             p.drawLine(QPointF(cx, r.bottom() - 4), QPointF(cx + 4, r.bottom() - 9))
@@ -175,8 +178,13 @@ def connection_icon(kind: CK, size: int = 32) -> QIcon:
     pm.fill(Qt.transparent)
     p = QPainter(pm)
     p.setRenderHint(QPainter.Antialiasing)
-    a, b = QPointF(4, size - 6), QPointF(size - 5, 6)
-    draw_link(p, kind, a, b, scale=0.8)
+    if kind == CK.RESOURCE:      # de baixo para cima
+        pts = [QPointF(size / 2, size - 3), QPointF(size / 2, 3)]
+    elif kind == CK.CONTROL:     # de cima para baixo
+        pts = [QPointF(size / 2, 3), QPointF(size / 2, size - 3)]
+    else:
+        pts = [QPointF(4, size - 6), QPointF(size - 5, 6)]
+    draw_link(p, kind, pts, scale=0.8)
     p.end()
     return QIcon(pm)
 
@@ -201,21 +209,25 @@ LINK_STYLE = {
 }
 
 
-def draw_link(p: QPainter, kind: CK, a: QPointF, b: QPointF, color: QColor = INK,
+def draw_link(p: QPainter, kind: CK, pts, color: QColor = INK,
               scale: float = 1.0, entry: bool = False) -> None:
+    """Desenha uma ligação passando pelos pontos ``pts`` (polilinha)."""
+    import math
     style, width = LINK_STYLE[kind]
-    p.setPen(QPen(color, width, style, Qt.RoundCap))
-    p.drawLine(a, b)
+    p.setPen(QPen(color, width, style, Qt.RoundCap, Qt.RoundJoin))
+    p.setBrush(Qt.NoBrush)
+    p.drawPolyline(QPolygonF(list(pts)))
     p.setPen(QPen(color, width, Qt.SolidLine))
     hs = 10 * scale
+    a, b = pts[0], pts[-1]
     if kind in (CK.FLOW, CK.CONTROL):
-        _arrow_head(p, b, a, hs)
+        _arrow_head(p, b, pts[-2], hs)
     elif kind == CK.RESOURCE:
-        _arrow_head(p, b, a, hs)
-        _arrow_head(p, a, b, hs)
+        _arrow_head(p, b, pts[-2], hs)
+        _arrow_head(p, a, pts[1], hs)
     if entry:  # fluxo de entrada no sistema: traço perpendicular na origem
-        import math
-        ang = math.atan2(b.y() - a.y(), b.x() - a.x())
+        nb = pts[1]
+        ang = math.atan2(nb.y() - a.y(), nb.x() - a.x())
         d = QPointF(-math.sin(ang) * 7, math.cos(ang) * 7)
         m = QPointF(a.x() + math.cos(ang) * 10, a.y() + math.sin(ang) * 10)
         p.drawLine(m - d, m + d)

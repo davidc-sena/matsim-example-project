@@ -55,8 +55,8 @@ python -m pytest
 |---|---|---|
 | Entidade (círculo) | E | Sem fluxo de entrada é uma **fonte de chegadas** (intervalo, primeira chegada, lote, máximo). Com fluxo de entrada é uma **transformação**: a entidade passa a ser deste tipo. |
 | Função (retângulo) | F | Captura 1 unidade de cada recurso ligado, processa durante o tempo definido e libera os recursos. Sem recurso, capacidade infinita. |
-| Recurso | R | Capacidade (n.º de unidades). É ligado à função pela *Ligação de recurso* (seta dupla). |
-| Controle | C | Documental. É ligado à função por seta tracejada. |
+| Recurso | R | Capacidade (n.º de unidades). Fica **abaixo** da função; a *Ligação de recurso* (seta dupla) entra pela base da função. |
+| Controle | C | Documental. Fica **acima** da função; a *Ligação de controle* entra pelo topo da função. |
 | Movimentação (seta larga) | M | Como a função, mas representa um transporte. |
 | Regra E (&) | 1 | Várias entradas: espera uma entidade de cada ramo (junção ou montagem). Várias saídas: segue por todos os ramos (paralelo). |
 | Regra OU (X) | 2 | Segue **uma** saída, escolhida pelas probabilidades. |

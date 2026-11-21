@@ -109,6 +109,20 @@ def validate(model: Model) -> list[Issue]:
                 add(INFO, f"{label} tem {len(outs)} saídas sem regra explícita; "
                           "será tratado como OU (X) pelas probabilidades.", e.id)
 
+        if e.kind == EK.RESOURCE:
+            for c in model.outgoing(e.id, CK.RESOURCE):
+                f = model.elements[c.target]
+                if e.y <= f.y:
+                    add(INFO, f"{label} está acima de '{f.name}'; na notação IDEF-SIM o recurso "
+                              "fica abaixo da função (seta de baixo para cima).", e.id)
+
+        if e.kind == EK.CONTROL:
+            for c in model.outgoing(e.id, CK.CONTROL):
+                f = model.elements[c.target]
+                if e.y >= f.y:
+                    add(INFO, f"{label} está abaixo de '{f.name}'; na notação IDEF-SIM o controle "
+                              "fica acima da função (seta de cima para baixo).", e.id)
+
         if e.kind == EK.EXIT and outs:
             add(ERROR, f"{label} não pode ter fluxos de saída.", e.id)
 
