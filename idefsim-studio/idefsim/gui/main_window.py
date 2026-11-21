@@ -24,7 +24,7 @@ from .items import EdgeItem, NodeItem
 from .properties import PropertiesPanel
 from .scene import DiagramScene
 
-FILE_FILTER = f"Modelos IDEF-SIM (*{FILE_EXTENSION});;Todos os ficheiros (*)"
+FILE_FILTER = f"Modelos IDEF-SIM (*{FILE_EXTENSION});;Todos os arquivos (*)"
 MAX_HISTORY = 200
 
 
@@ -109,19 +109,19 @@ class MainWindow(QMainWindow):
         S = QKeySequence.StandardKey
         self.a_new = self._act("&Novo", self.new_model, S.New)
         self.a_open = self._act("&Abrir…", lambda: self.open_file(), S.Open)
-        self.a_save = self._act("&Guardar", self.save, S.Save)
-        self.a_save_as = self._act("Guardar &como…", self.save_as, S.SaveAs)
+        self.a_save = self._act("&Salvar", self.save, S.Save)
+        self.a_save_as = self._act("Salvar &como…", self.save_as, S.SaveAs)
         self.a_png = self._act("Exportar imagem PNG…", lambda: self.export_image("png"))
         self.a_svg = self._act("Exportar imagem SVG…", lambda: self.export_image("svg"))
         self.a_html = self._act("Exportar documentação HTML…", self.export_html)
         self.a_quit = self._act("&Sair", self.close, S.Quit)
         self.a_undo = self._act("&Desfazer", self.undo, S.Undo)
         self.a_redo = self._act("&Refazer", self.redo, S.Redo)
-        self.a_del = self._act("&Eliminar", self.scene.delete_selected, S.Delete)
+        self.a_del = self._act("&Excluir", self.scene.delete_selected, S.Delete)
         self.a_dup = self._act("D&uplicar", self.scene.duplicate_selected, "Ctrl+D")
         self.a_all = self._act("Selecionar &tudo", self._select_all, S.SelectAll)
-        self.a_zin = self._act("Ampliar", lambda: self.view.scale(1.2, 1.2), S.ZoomIn)
-        self.a_zout = self._act("Reduzir", lambda: self.view.scale(1 / 1.2, 1 / 1.2), S.ZoomOut)
+        self.a_zin = self._act("Aumentar zoom", lambda: self.view.scale(1.2, 1.2), S.ZoomIn)
+        self.a_zout = self._act("Diminuir zoom", lambda: self.view.scale(1 / 1.2, 1 / 1.2), S.ZoomOut)
         self.a_fit = self._act("Ajustar à janela", self.fit, "Ctrl+0")
         self.a_validate = self._act("&Validar modelo", self.validate, "F7")
         self.a_run = self._act("&Executar simulação", self.run_sim, "F5")
@@ -131,9 +131,9 @@ class MainWindow(QMainWindow):
 
     def _build_menus(self):
         mb = self.menuBar()
-        m = mb.addMenu("&Ficheiro")
+        m = mb.addMenu("&Arquivo")
         m.addActions([self.a_new, self.a_open])
-        self.recent_menu = m.addMenu("Abrir &recente")
+        self.recent_menu = m.addMenu("Abrir &recentes")
         ex = m.addMenu("Abrir &exemplo")
         for name, fn in EXAMPLES.items():
             ex.addAction(self._act(name, lambda _=False, fn=fn: self._load_example(fn)))
@@ -147,7 +147,7 @@ class MainWindow(QMainWindow):
         m.addActions([self.a_undo, self.a_redo])
         m.addSeparator()
         m.addActions([self.a_dup, self.a_del, self.a_all])
-        m = mb.addMenu("&Ver")
+        m = mb.addMenu("E&xibir")
         m.addActions([self.a_zin, self.a_zout, self.a_fit])
         m = mb.addMenu("&Modelo")
         m.addActions([self.a_props, self.a_validate])
@@ -287,7 +287,7 @@ class MainWindow(QMainWindow):
         if eid:
             self.scene.select_element(eid)
 
-    # ---------------------------------------------------------- ficheiros
+    # ---------------------------------------------------------- arquivos
     def _set_dirty(self, d: bool):
         self.dirty = d
         self._update_title()
@@ -299,8 +299,8 @@ class MainWindow(QMainWindow):
     def _maybe_save(self) -> bool:
         if not self.dirty:
             return True
-        r = QMessageBox.question(self, "Alterações por guardar",
-                                 "O modelo tem alterações por guardar. Deseja guardá-las?",
+        r = QMessageBox.question(self, "Alterações não salvas",
+                                 "O modelo tem alterações não salvas. Deseja salvá-las?",
                                  QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
         if r == QMessageBox.Save:
             return self.save()
@@ -333,7 +333,7 @@ class MainWindow(QMainWindow):
         try:
             model = load_model(path)
         except Exception as ex:  # noqa: BLE001
-            QMessageBox.critical(self, "Erro ao abrir", f"Não foi possível abrir o ficheiro:\n{ex}")
+            QMessageBox.critical(self, "Erro ao abrir", f"Não foi possível abrir o arquivo:\n{ex}")
             return
         self._set_model(model, Path(path))
         self._add_recent(path)
@@ -344,16 +344,16 @@ class MainWindow(QMainWindow):
         try:
             save_model(self.scene.model, self.path)
         except OSError as ex:
-            QMessageBox.critical(self, "Erro ao guardar", str(ex))
+            QMessageBox.critical(self, "Erro ao salvar", str(ex))
             return False
         self._set_dirty(False)
         self._add_recent(str(self.path))
-        self.statusBar().showMessage(f"Guardado em {self.path}", 4000)
+        self.statusBar().showMessage(f"Salvo em {self.path}", 4000)
         return True
 
     def save_as(self) -> bool:
         default = str(Path(self._last_dir()) / (self.scene.model.name + FILE_EXTENSION))
-        path, _ = QFileDialog.getSaveFileName(self, "Guardar modelo", default, FILE_FILTER)
+        path, _ = QFileDialog.getSaveFileName(self, "Salvar modelo", default, FILE_FILTER)
         if not path:
             return False
         if not path.endswith(FILE_EXTENSION):
@@ -483,7 +483,7 @@ class MainWindow(QMainWindow):
                                                    "Validação antes de simular.")
             return
         n = self.scene.model.settings.replications
-        dlg = QProgressDialog("A simular…", "Cancelar", 0, n, self)
+        dlg = QProgressDialog("Simulando…", "Cancelar", 0, n, self)
         dlg.setWindowTitle("Simulação")
         dlg.setWindowModality(Qt.WindowModal)
         dlg.setMinimumDuration(300)

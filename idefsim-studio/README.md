@@ -10,11 +10,11 @@ simulação a eventos discretos.
 
 | Área | O que faz |
 |---|---|
-| **Editor gráfico** | Paleta com todos os símbolos IDEF-SIM. Pode arrastar, encaixar na grelha, fazer zoom (Ctrl+roda), duplicar (Ctrl+D), eliminar, desfazer e refazer. |
+| **Editor gráfico** | Paleta com todos os símbolos IDEF-SIM. Pode arrastar, encaixar na grade, dar zoom (Ctrl+roda), duplicar (Ctrl+D), excluir, desfazer e refazer. |
 | **Propriedades** | Nome, descrição e parâmetros de cada elemento: chegadas, tempos, capacidades e probabilidades. |
-| **Validação** (F7) | Erros e avisos em tempo real: elementos sem fluxo, distribuições inválidas, conectores sem par, probabilidades, elementos inalcançáveis… Clique numa mensagem para ir ao elemento. |
+| **Validação** (F7) | Erros e avisos em tempo real: elementos sem fluxo, distribuições inválidas, conectores sem par, probabilidades, elementos inalcançáveis… Clique em uma mensagem para ir ao elemento. |
 | **Simulação** (F5) | Motor de eventos discretos (SimPy) que executa o próprio diagrama, com replicações, aquecimento, média, desvio padrão e IC 95%. Os resultados exportam para CSV. |
-| **Gestão de modelos** | Ficheiros `.idefsim` (JSON legível e versionável), metadados (autor, versão e descrição), ficheiros recentes e modelos de exemplo. |
+| **Gestão de modelos** | Arquivos `.idefsim` (JSON legível e versionável), metadados (autor, versão e descrição), arquivos recentes e modelos de exemplo. |
 | **Documentação** | Exportação do diagrama em PNG ou SVG e do dicionário do modelo conceitual em HTML (com o diagrama embutido). |
 
 ## Instalação e execução
@@ -45,7 +45,7 @@ python -m pytest
 ## Como modelar
 
 1. Escolha um símbolo na paleta (ou use o atalho) e clique no diagrama. **Shift** mantém a ferramenta ativa; **Esc** ou o botão direito volta a *Selecionar*.
-2. Para ligar dois elementos, escolha a ligação (*Fluxo*, *Recurso*, *Controle* ou *Nota*), clique na origem e depois no destino.
+2. Para conectar dois elementos, escolha a ligação (*Fluxo*, *Recurso*, *Controle* ou *Nota*), clique na origem e depois no destino.
 3. Edite os parâmetros no painel **Propriedades**. Sem nada selecionado, o painel mostra as propriedades do modelo (duração, aquecimento, replicações, unidade de tempo).
 4. **F7** valida o modelo e **F5** executa a simulação.
 
@@ -54,13 +54,13 @@ python -m pytest
 | Símbolo | Atalho | Interpretação na simulação |
 |---|---|---|
 | Entidade (círculo) | E | Sem fluxo de entrada é uma **fonte de chegadas** (intervalo, primeira chegada, lote, máximo). Com fluxo de entrada é uma **transformação**: a entidade passa a ser deste tipo. |
-| Função (retângulo) | F | Apreende 1 unidade de cada recurso ligado, processa durante o tempo definido e liberta os recursos. Sem recurso, capacidade infinita. |
-| Recurso | R | Capacidade (n.º de unidades). Liga-se à função com *Ligação de recurso* (seta dupla). |
-| Controle | C | Documental. Liga-se à função com seta tracejada. |
+| Função (retângulo) | F | Captura 1 unidade de cada recurso ligado, processa durante o tempo definido e libera os recursos. Sem recurso, capacidade infinita. |
+| Recurso | R | Capacidade (n.º de unidades). É ligado à função pela *Ligação de recurso* (seta dupla). |
+| Controle | C | Documental. É ligado à função por seta tracejada. |
 | Movimentação (seta larga) | M | Como a função, mas representa um transporte. |
 | Regra E (&) | 1 | Várias entradas: espera uma entidade de cada ramo (junção ou montagem). Várias saídas: segue por todos os ramos (paralelo). |
 | Regra OU (X) | 2 | Segue **uma** saída, escolhida pelas probabilidades. |
-| Regra E/OU (O) | 3 | Cada saída é seguida de forma independente com a sua probabilidade (pelo menos uma). |
+| Regra E/OU (O) | 3 | Cada saída é seguida de forma independente com sua probabilidade (pelo menos uma). |
 | Ponto final | X | A entidade sai do sistema (contabiliza o tempo no sistema). |
 | Conexão | K | Conectores com o **mesmo nome** estão ligados (útil para diagramas grandes). |
 | Informação explicativa | N | Nota de texto, sem efeito na simulação. |
@@ -90,11 +90,11 @@ idefsim/
   validation.py     verificação de consistência
   simulation.py     motor SimPy e estatísticas
   report.py         documentação HTML
-  storage.py        leitura e gravação .idefsim
+  storage.py        leitura e gravação de .idefsim
   examples.py       modelos de exemplo
   gui/              interface PySide6 (janela, cena, itens, propriedades, diálogos)
 tests/              testes automáticos (núcleo + interface)
-examples/           ficheiros .idefsim de exemplo
+examples/           arquivos .idefsim de exemplo
 ```
 
 O núcleo (`model`, `simulation`, …) não depende da interface, por isso pode ser usado

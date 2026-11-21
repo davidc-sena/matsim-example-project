@@ -5,13 +5,13 @@ Semântica adotada:
 * **Entidade** sem fluxo de entrada → fonte de chegadas (intervalo, lote,
   primeira chegada, máximo de chegadas). Entidade *com* fluxo de entrada →
   transformação: a entidade que chega passa a ter esse tipo.
-* **Função / Movimentação** → apreende todos os recursos ligados (1 unidade
-  de cada), espera o tempo de processamento e liberta-os. Sem recursos é um
+* **Função / Movimentação** → captura todos os recursos ligados (1 unidade
+  de cada), espera o tempo de processamento e os libera. Sem recursos é um
   atraso puro (capacidade infinita).
 * **Regra OU (X)** → escolhe uma saída pelas probabilidades dos fluxos.
 * **Regra E (&)** → com várias entradas aguarda uma entidade de cada ramo
   (montagem/junção); com várias saídas duplica a entidade (divisão paralela).
-* **Regra E/OU (O)** → cada saída é seguida de forma independente com a sua
+* **Regra E/OU (O)** → cada saída é seguida de forma independente com sua
   probabilidade (pelo menos uma).
 * **Conexão** → a entidade salta para o conector com o mesmo nome que tem
   fluxo de saída.
@@ -366,7 +366,7 @@ class _Replication:
 
 def run_simulation(model: Model,
                    progress: Callable[[int, int], bool | None] | None = None) -> SimulationResult:
-    """Executa todas as replicações. ``progress(i, n)`` pode devolver False para cancelar."""
+    """Executa todas as replicações. ``progress(i, n)`` pode retornar False para cancelar."""
     issues = validate(model)
     if has_errors(issues):
         raise SimulationError("O modelo tem erros:\n" + "\n".join(

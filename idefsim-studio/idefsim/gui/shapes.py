@@ -1,4 +1,4 @@
-"""Desenho dos símbolos IDEF-SIM (partilhado entre o diagrama e os ícones)."""
+"""Desenho dos símbolos IDEF-SIM (compartilhado entre o diagrama e os ícones)."""
 from __future__ import annotations
 
 from PySide6.QtCore import QPointF, QRectF, Qt

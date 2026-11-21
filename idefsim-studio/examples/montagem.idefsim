@@ -14,7 +14,7 @@
   },
   "elements": [
     {
-      "id": "b63dc785c8",
+      "id": "b5aec09c98",
       "kind": "entity",
       "name": "Base",
       "x": 60,
@@ -28,7 +28,7 @@
       }
     },
     {
-      "id": "4934764258",
+      "id": "d5b1050dac",
       "kind": "entity",
       "name": "Tampa",
       "x": 60,
@@ -42,7 +42,7 @@
       }
     },
     {
-      "id": "f473590fa8",
+      "id": "a5e7eed54b",
       "kind": "function",
       "name": "Preparar base",
       "x": 220,
@@ -53,7 +53,7 @@
       }
     },
     {
-      "id": "f3aaa9af95",
+      "id": "c803108a21",
       "kind": "function",
       "name": "Preparar tampa",
       "x": 220,
@@ -64,7 +64,7 @@
       }
     },
     {
-      "id": "2c17449b94",
+      "id": "86e55a9ea5",
       "kind": "rule_and",
       "name": "&",
       "x": 380,
@@ -73,7 +73,7 @@
       "params": {}
     },
     {
-      "id": "2bd858b9f3",
+      "id": "36bfe20e7c",
       "kind": "entity",
       "name": "Produto",
       "x": 480,
@@ -87,7 +87,7 @@
       }
     },
     {
-      "id": "91f4bd668f",
+      "id": "784b6383d5",
       "kind": "function",
       "name": "Montar",
       "x": 620,
@@ -98,7 +98,7 @@
       }
     },
     {
-      "id": "6e44795890",
+      "id": "24e9ba5450",
       "kind": "resource",
       "name": "Montador",
       "x": 620,
@@ -109,7 +109,7 @@
       }
     },
     {
-      "id": "2b561afdea",
+      "id": "8ecbcffd46",
       "kind": "exit",
       "name": "Armazém",
       "x": 780,
@@ -120,66 +120,66 @@
   ],
   "connections": [
     {
-      "id": "b91cff5339",
+      "id": "7aed2cfed8",
       "kind": "flow",
-      "source": "b63dc785c8",
-      "target": "f473590fa8",
+      "source": "b5aec09c98",
+      "target": "a5e7eed54b",
       "label": "",
       "probability": 1.0
     },
     {
-      "id": "9d14bc6499",
+      "id": "25a011b173",
       "kind": "flow",
-      "source": "4934764258",
-      "target": "f3aaa9af95",
+      "source": "d5b1050dac",
+      "target": "c803108a21",
       "label": "",
       "probability": 1.0
     },
     {
-      "id": "9f0bd3d277",
+      "id": "0a570b2586",
       "kind": "flow",
-      "source": "f473590fa8",
-      "target": "2c17449b94",
+      "source": "a5e7eed54b",
+      "target": "86e55a9ea5",
       "label": "",
       "probability": 1.0
     },
     {
-      "id": "d26e12f283",
+      "id": "c33f715991",
       "kind": "flow",
-      "source": "f3aaa9af95",
-      "target": "2c17449b94",
+      "source": "c803108a21",
+      "target": "86e55a9ea5",
       "label": "",
       "probability": 1.0
     },
     {
-      "id": "238e73ec4c",
+      "id": "c2de6c3a5d",
       "kind": "flow",
-      "source": "2c17449b94",
-      "target": "2bd858b9f3",
+      "source": "86e55a9ea5",
+      "target": "36bfe20e7c",
       "label": "",
       "probability": 1.0
     },
     {
-      "id": "12947b25c1",
+      "id": "4048b62a73",
       "kind": "flow",
-      "source": "2bd858b9f3",
-      "target": "91f4bd668f",
+      "source": "36bfe20e7c",
+      "target": "784b6383d5",
       "label": "",
       "probability": 1.0
     },
     {
-      "id": "34c5885939",
+      "id": "1abab4c17b",
       "kind": "flow",
-      "source": "91f4bd668f",
-      "target": "2b561afdea",
+      "source": "784b6383d5",
+      "target": "8ecbcffd46",
       "label": "",
       "probability": 1.0
     },
     {
-      "id": "ed470b0a99",
+      "id": "0545cd8274",
       "kind": "resource",
-      "source": "6e44795890",
-      "target": "91f4bd668f",
+      "source": "24e9ba5450",
+      "target": "784b6383d5",
       "label": "",
       "probability": 1.0
     }

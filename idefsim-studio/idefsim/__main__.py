@@ -12,7 +12,7 @@ def main() -> int:
     app.setStyle("Fusion")
     tr = QTranslator(app)
     tr_dir = QLibraryInfo.path(QLibraryInfo.LibraryPath.TranslationsPath)
-    for lang in (QLocale.system().name(), "pt_BR", "pt_PT"):
+    for lang in ("pt_BR",):
         if tr.load(f"qtbase_{lang}", tr_dir):
             app.installTranslator(tr)
             break

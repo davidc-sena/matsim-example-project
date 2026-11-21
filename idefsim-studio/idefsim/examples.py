@@ -7,7 +7,7 @@ from .model import ConnectionKind as CK, ElementKind as EK, Model
 def usinagem_inspecao() -> Model:
     """Célula de usinagem com inspeção e retrabalho (10% de rejeição)."""
     m = Model(name="Célula de usinagem com inspeção", author="IDEF-SIM Studio",
-              description="Peças chegam, são usinadas no torno, transportadas até à "
+              description="Peças chegam, são usinadas no torno, transportadas até a "
                           "inspeção; 10% seguem para retrabalho e voltam à inspeção.")
     m.settings.duration, m.settings.warmup, m.settings.replications = 480, 60, 10
     peca = m.add_element(EK.ENTITY, 60, 200, "Peça", interarrival="EXPO(6)")
@@ -38,7 +38,7 @@ def usinagem_inspecao() -> Model:
 
 
 def montagem() -> Model:
-    """Montagem: base e tampa juntam-se numa regra E (&) e formam o produto."""
+    """Montagem: base e tampa se juntam em uma regra E (&) e formam o produto."""
     m = Model(name="Montagem com junção E", author="IDEF-SIM Studio")
     m.settings.duration, m.settings.replications = 600, 5
     base = m.add_element(EK.ENTITY, 60, 120, "Base", interarrival="EXPO(5)")

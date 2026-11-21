@@ -111,7 +111,7 @@ class DiagramScene(QGraphicsScene):
         self.refresh_all()
         self.clearSelection()
         self.edges[c.id].setSelected(True)
-        self.modelChanged.emit("Ligar elementos", "")
+        self.modelChanged.emit("Conectar elementos", "")
         return c
 
     def delete_selected(self) -> None:
@@ -147,7 +147,7 @@ class DiagramScene(QGraphicsScene):
             for v in self.views():
                 v.centerOn(self.nodes[eid])
 
-    # ------------------------------------------------------------------ rato
+    # ----------------------------------------------------------------- mouse
     def mousePressEvent(self, ev):
         if ev.button() == Qt.RightButton and self.tool != "select":
             self.set_tool("select")

@@ -9,7 +9,7 @@ from .. import distributions as dist
 from ..model import (CONNECTION_LABELS, KIND_LABELS, Connection, ConnectionKind as CK,
                      Element, ElementKind as EK, Model, PROCESS_KINDS)
 
-DIST_HELP = ("Distribuições aceites:\n" + "\n".join(dist.SUPPORTED)
+DIST_HELP = ("Distribuições aceitas:\n" + "\n".join(dist.SUPPORTED)
              + "\n\nUse ';' para separar argumentos com vírgula decimal, ex.: NORM(5,5; 0,8)")
 
 
@@ -123,7 +123,7 @@ class PropertiesPanel(QScrollArea):
         self._spin("Semente", s.seed, setter(s, "seed", "Semente"), 0, 2**31 - 1)
         n_el = len(model.elements)
         self.form.addRow(QLabel(f"<i>{n_el} elementos, {len(model.connections)} ligações.<br>"
-                                "Selecione um elemento para editar as suas propriedades.</i>"))
+                                "Selecione um elemento para editar suas propriedades.</i>"))
 
     # ---------------------------------------------------------------- elemento
     def show_element(self, model: Model, e: Element) -> None:
@@ -150,7 +150,7 @@ class PropertiesPanel(QScrollArea):
 
         if e.kind not in (EK.RULE_AND, EK.RULE_OR, EK.RULE_ANDOR):
             self._line("Nome", e.name, set_name,
-                       "Conectores com o mesmo nome ligam-se entre si." if e.kind == EK.CONNECTOR else "")
+                       "Conectores com o mesmo nome se conectam entre si." if e.kind == EK.CONNECTOR else "")
         else:
             self.form.addRow(QLabel(self._rule_help(e.kind)))
 
@@ -168,7 +168,7 @@ class PropertiesPanel(QScrollArea):
                 self._spin("Máx. de chegadas", e.params.get("max_arrivals", 0),
                            set_param("max_arrivals", "Máx. chegadas"), 0, 10**9, "0 = ilimitado")
         elif e.kind in PROCESS_KINDS:
-            self._line("Tempo" + (" de processamento" if e.kind == EK.FUNCTION else " de deslocação"),
+            self._line("Tempo" + (" de processamento" if e.kind == EK.FUNCTION else " de deslocamento"),
                        e.params.get("duration", ""), set_param("duration", "Tempo"), DIST_HELP, dist.is_valid)
             res = model.resources_of(e.id)
             self.form.addRow("Recursos", QLabel(", ".join(r.name for r in res) or
@@ -197,7 +197,7 @@ class PropertiesPanel(QScrollArea):
             EK.RULE_OR: "<b>X (OU)</b>: a entidade segue apenas uma das saídas, escolhida "
                         "pelas probabilidades.",
             EK.RULE_ANDOR: "<b>O (E/OU)</b>: cada saída é seguida de forma independente "
-                           "com a sua probabilidade.",
+                           "com sua probabilidade.",
         }[kind]
 
     def _prob_row(self, model, c: Connection, name: str):

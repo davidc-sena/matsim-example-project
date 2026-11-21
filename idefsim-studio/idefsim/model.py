@@ -209,7 +209,7 @@ class Model:
     def check_connection(self, kind: ConnectionKind, source: str, target: str) -> tuple[str, str]:
         """Valida e normaliza (source, target). Levanta ConnectionError_."""
         if source == target:
-            raise ConnectionError_("Não é possível ligar um elemento a ele próprio.")
+            raise ConnectionError_("Não é possível ligar um elemento a ele mesmo.")
         s, t = self.elements[source], self.elements[target]
         if kind == ConnectionKind.FLOW:
             if s.kind not in FLOW_SOURCES:
@@ -220,12 +220,12 @@ class Model:
             if t.kind == ElementKind.RESOURCE:
                 s, t = t, s
             if s.kind != ElementKind.RESOURCE or t.kind not in PROCESS_KINDS:
-                raise ConnectionError_("Recursos ligam-se apenas a Funções ou Movimentações.")
+                raise ConnectionError_("Recursos só podem ser ligados a Funções ou Movimentações.")
         elif kind == ConnectionKind.CONTROL:
             if t.kind == ElementKind.CONTROL:
                 s, t = t, s
             if s.kind != ElementKind.CONTROL or t.kind not in PROCESS_KINDS:
-                raise ConnectionError_("Controles ligam-se apenas a Funções ou Movimentações.")
+                raise ConnectionError_("Controles só podem ser ligados a Funções ou Movimentações.")
         elif kind == ConnectionKind.NOTE:
             if t.kind == ElementKind.NOTE:
                 s, t = t, s
@@ -267,7 +267,7 @@ class Model:
     @classmethod
     def from_dict(cls, d: dict) -> "Model":
         if d.get("format") not in (None, "idefsim-studio"):
-            raise ValueError("Ficheiro não é um modelo IDEF-SIM Studio.")
+            raise ValueError("O arquivo não é um modelo IDEF-SIM Studio.")
         m = cls(name=d.get("name", "Modelo"), author=d.get("author", ""),
                 version=str(d.get("version", "1.0")), description=d.get("description", ""),
                 settings=SimulationSettings.from_dict(d.get("settings", {})))

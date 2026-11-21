@@ -18,7 +18,7 @@ _ORDER = [EK.ENTITY, EK.FUNCTION, EK.MOVEMENT, EK.RESOURCE, EK.CONTROL,
 
 def model_to_html(model: Model, diagram_svg: str | None = None) -> str:
     u = escape(model.settings.time_unit)
-    h = [f"<!doctype html><html lang='pt'><meta charset='utf-8'><title>{escape(model.name)}</title>",
+    h = [f"<!doctype html><html lang='pt-BR'><meta charset='utf-8'><title>{escape(model.name)}</title>",
          "<style>body{font-family:Segoe UI,Arial,sans-serif;margin:2em;color:#222}"
          "table{border-collapse:collapse;margin:.5em 0 1.5em;width:100%}"
          "td,th{border:1px solid #bbb;padding:4px 8px;text-align:left;vertical-align:top}"

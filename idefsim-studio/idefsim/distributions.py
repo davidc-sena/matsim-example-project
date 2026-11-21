@@ -1,6 +1,6 @@
 """Distribuições estatísticas em notação semelhante à do Arena.
 
-Exemplos aceites::
+Exemplos aceitos::
 
     5            CONST(5)        EXPO(10)        NORM(5; 0,5)
     TRIA(2, 4, 7)  UNIF(1, 3)    LOGN(5, 1)      ERLA(6, 3)   WEIB(5, 2)
@@ -108,7 +108,7 @@ def parse(text: str) -> Distribution:
     if name in ("NORM", "LOGN") and args[1] < 0:
         raise DistributionError(f"{name}: o desvio não pode ser negativo.")
     if name == "TRIA" and not (args[0] <= args[1] <= args[2]):
-        raise DistributionError("TRIA: deve verificar mín ≤ moda ≤ máx.")
+        raise DistributionError("TRIA: deve satisfazer mín ≤ moda ≤ máx.")
     if name == "UNIF" and args[0] > args[1]:
         raise DistributionError("UNIF: mín deve ser ≤ máx.")
     if name == "ERLA" and (args[1] < 1 or args[1] != int(args[1])):
