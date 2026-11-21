@@ -27,13 +27,40 @@ pip install -r requirements.txt
 python main.py                       # ou: python main.py examples/usinagem_inspecao.idefsim
 ```
 
-### Gerar um executável (.exe / app)
+### Executáveis prontos (Windows, macOS, Linux)
+
+O workflow `.github/workflows/idefsim-studio.yml` compila automaticamente os executáveis
+em máquinas Windows, macOS e Linux do GitHub Actions:
+
+* **A cada push** que altere `idefsim-studio/`, os pacotes ficam em *Actions* → execução → *Artifacts*.
+* **Ao publicar um Release** no GitHub, os pacotes são anexados ao Release.
+* Também é possível rodar manualmente em *Actions* → *IDEF-SIM Studio - executáveis* → *Run workflow*.
+
+| Sistema | Arquivo | Como instalar |
+|---|---|---|
+| Windows 10/11 (64 bits) | `IDEF-SIM-Studio-windows-x64.zip` | Extraia a pasta e execute `IDEF-SIM Studio.exe`. |
+| macOS Apple Silicon (M1–M4) | `IDEF-SIM-Studio-macos-arm64.dmg` | Abra o `.dmg` e arraste o app para *Aplicativos*. |
+| macOS Intel | `IDEF-SIM-Studio-macos-x64.dmg` | Igual ao anterior. |
+| Linux 64 bits (Ubuntu 22.04+ e similares) | `IDEF-SIM-Studio-linux-x64.tar.gz` | `tar -xzf IDEF-SIM-Studio-linux-x64.tar.gz` e execute `IDEF-SIM Studio/IDEF-SIM Studio`. |
+
+> **Aviso de segurança na primeira execução.** Os executáveis não têm assinatura digital
+> paga, por isso o sistema pode exibir um alerta:
+> * **Windows** (SmartScreen): clique em *Mais informações* → *Executar assim mesmo*.
+> * **macOS** (Gatekeeper): clique com o botão direito no app → *Abrir* → *Abrir*. Se não
+>   funcionar, rode `xattr -dr com.apple.quarantine "/Applications/IDEF-SIM Studio.app"`.
+
+### Gerar o executável localmente
+
+O PyInstaller gera o executável **do sistema em que é executado** (é preciso um Windows
+para gerar o `.exe` e um Mac para o `.app`):
 
 ```bash
-pip install pyinstaller
-pyinstaller --noconfirm --windowed --name "IDEF-SIM Studio" main.py
-# resultado em dist/IDEF-SIM Studio/
+pip install -r requirements.txt pyinstaller pillow
+pyinstaller --noconfirm packaging/idefsim_studio.spec
+# resultado em dist/
 ```
+
+O ícone (`idefsim/resources/icon.png`) é gerado por `python packaging/make_icon.py`.
 
 ### Testes
 
