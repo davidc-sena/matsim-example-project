@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "idefsim-studio"
+version = "0.1.0"
+description = "Editor e simulador de modelos conceituais IDEF-SIM para simulação a eventos discretos"
+requires-python = ">=3.10"
+dependencies = ["PySide6>=6.6", "simpy>=4.1"]
+
+[project.optional-dependencies]
+dev = ["pytest", "pyinstaller"]
+
+[project.gui-scripts]
+idefsim-studio = "idefsim.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["idefsim*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

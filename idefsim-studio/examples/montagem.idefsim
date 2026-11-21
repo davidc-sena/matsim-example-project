@@ -1,0 +1,187 @@
+{
+  "format": "idefsim-studio",
+  "format_version": 1,
+  "name": "Montagem com junção E",
+  "author": "IDEF-SIM Studio",
+  "version": "1.0",
+  "description": "",
+  "settings": {
+    "time_unit": "min",
+    "duration": 600,
+    "warmup": 0.0,
+    "replications": 5,
+    "seed": 12345
+  },
+  "elements": [
+    {
+      "id": "b63dc785c8",
+      "kind": "entity",
+      "name": "Base",
+      "x": 60,
+      "y": 120,
+      "description": "",
+      "params": {
+        "interarrival": "EXPO(5)",
+        "first_arrival": "0",
+        "max_arrivals": 0,
+        "batch_size": 1
+      }
+    },
+    {
+      "id": "4934764258",
+      "kind": "entity",
+      "name": "Tampa",
+      "x": 60,
+      "y": 300,
+      "description": "",
+      "params": {
+        "interarrival": "EXPO(5)",
+        "first_arrival": "0",
+        "max_arrivals": 0,
+        "batch_size": 1
+      }
+    },
+    {
+      "id": "f473590fa8",
+      "kind": "function",
+      "name": "Preparar base",
+      "x": 220,
+      "y": 120,
+      "description": "",
+      "params": {
+        "duration": "TRIA(2, 3, 4)"
+      }
+    },
+    {
+      "id": "f3aaa9af95",
+      "kind": "function",
+      "name": "Preparar tampa",
+      "x": 220,
+      "y": 300,
+      "description": "",
+      "params": {
+        "duration": "TRIA(1, 2, 3)"
+      }
+    },
+    {
+      "id": "2c17449b94",
+      "kind": "rule_and",
+      "name": "&",
+      "x": 380,
+      "y": 210,
+      "description": "",
+      "params": {}
+    },
+    {
+      "id": "2bd858b9f3",
+      "kind": "entity",
+      "name": "Produto",
+      "x": 480,
+      "y": 210,
+      "description": "",
+      "params": {
+        "interarrival": "EXPO(10)",
+        "first_arrival": "0",
+        "max_arrivals": 0,
+        "batch_size": 1
+      }
+    },
+    {
+      "id": "91f4bd668f",
+      "kind": "function",
+      "name": "Montar",
+      "x": 620,
+      "y": 210,
+      "description": "",
+      "params": {
+        "duration": "NORM(3.5, 0.4)"
+      }
+    },
+    {
+      "id": "6e44795890",
+      "kind": "resource",
+      "name": "Montador",
+      "x": 620,
+      "y": 90,
+      "description": "",
+      "params": {
+        "capacity": 1
+      }
+    },
+    {
+      "id": "2b561afdea",
+      "kind": "exit",
+      "name": "Armazém",
+      "x": 780,
+      "y": 210,
+      "description": "",
+      "params": {}
+    }
+  ],
+  "connections": [
+    {
+      "id": "b91cff5339",
+      "kind": "flow",
+      "source": "b63dc785c8",
+      "target": "f473590fa8",
+      "label": "",
+      "probability": 1.0
+    },
+    {
+      "id": "9d14bc6499",
+      "kind": "flow",
+      "source": "4934764258",
+      "target": "f3aaa9af95",
+      "label": "",
+      "probability": 1.0
+    },
+    {
+      "id": "9f0bd3d277",
+      "kind": "flow",
+      "source": "f473590fa8",
+      "target": "2c17449b94",
+      "label": "",
+      "probability": 1.0
+    },
+    {
+      "id": "d26e12f283",
+      "kind": "flow",
+      "source": "f3aaa9af95",
+      "target": "2c17449b94",
+      "label": "",
+      "probability": 1.0
+    },
+    {
+      "id": "238e73ec4c",
+      "kind": "flow",
+      "source": "2c17449b94",
+      "target": "2bd858b9f3",
+      "label": "",
+      "probability": 1.0
+    },
+    {
+      "id": "12947b25c1",
+      "kind": "flow",
+      "source": "2bd858b9f3",
+      "target": "91f4bd668f",
+      "label": "",
+      "probability": 1.0
+    },
+    {
+      "id": "34c5885939",
+      "kind": "flow",
+      "source": "91f4bd668f",
+      "target": "2b561afdea",
+      "label": "",
+      "probability": 1.0
+    },
+    {
+      "id": "ed470b0a99",
+      "kind": "resource",
+      "source": "6e44795890",
+      "target": "91f4bd668f",
+      "label": "",
+      "probability": 1.0
+    }
+  ]
+}

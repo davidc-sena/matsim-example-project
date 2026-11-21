@@ -1,0 +1,242 @@
+{
+  "format": "idefsim-studio",
+  "format_version": 1,
+  "name": "Célula de usinagem com inspeção",
+  "author": "IDEF-SIM Studio",
+  "version": "1.0",
+  "description": "Peças chegam, são usinadas no torno, transportadas até à inspeção; 10% seguem para retrabalho e voltam à inspeção.",
+  "settings": {
+    "time_unit": "min",
+    "duration": 480,
+    "warmup": 60,
+    "replications": 10,
+    "seed": 12345
+  },
+  "elements": [
+    {
+      "id": "961fab1167",
+      "kind": "entity",
+      "name": "Peça",
+      "x": 60,
+      "y": 200,
+      "description": "",
+      "params": {
+        "interarrival": "EXPO(6)",
+        "first_arrival": "0",
+        "max_arrivals": 0,
+        "batch_size": 1
+      }
+    },
+    {
+      "id": "6d704d1ee6",
+      "kind": "function",
+      "name": "Usinar",
+      "x": 220,
+      "y": 200,
+      "description": "",
+      "params": {
+        "duration": "TRIA(3, 4.5, 6)"
+      }
+    },
+    {
+      "id": "44cfb8f96c",
+      "kind": "resource",
+      "name": "Torno",
+      "x": 220,
+      "y": 80,
+      "description": "",
+      "params": {
+        "capacity": 1
+      }
+    },
+    {
+      "id": "8aecd87dea",
+      "kind": "control",
+      "name": "Plano de produção",
+      "x": 220,
+      "y": 320,
+      "description": "",
+      "params": {}
+    },
+    {
+      "id": "08ace4e286",
+      "kind": "movement",
+      "name": "Transportar",
+      "x": 400,
+      "y": 200,
+      "description": "",
+      "params": {
+        "duration": "UNIF(1, 2)"
+      }
+    },
+    {
+      "id": "34cf2ad365",
+      "kind": "resource",
+      "name": "Operador logístico",
+      "x": 400,
+      "y": 80,
+      "description": "",
+      "params": {
+        "capacity": 1
+      }
+    },
+    {
+      "id": "6f9eee6d72",
+      "kind": "function",
+      "name": "Inspecionar",
+      "x": 580,
+      "y": 200,
+      "description": "",
+      "params": {
+        "duration": "NORM(4; 0,5)"
+      }
+    },
+    {
+      "id": "ec49ddf286",
+      "kind": "resource",
+      "name": "Inspetor",
+      "x": 580,
+      "y": 80,
+      "description": "",
+      "params": {
+        "capacity": 1
+      }
+    },
+    {
+      "id": "719233efb5",
+      "kind": "rule_or",
+      "name": "X",
+      "x": 720,
+      "y": 200,
+      "description": "",
+      "params": {}
+    },
+    {
+      "id": "f0482416dc",
+      "kind": "exit",
+      "name": "Expedição",
+      "x": 860,
+      "y": 200,
+      "description": "",
+      "params": {}
+    },
+    {
+      "id": "5fc50d7aa8",
+      "kind": "function",
+      "name": "Retrabalhar",
+      "x": 720,
+      "y": 340,
+      "description": "",
+      "params": {
+        "duration": "EXPO(8)"
+      }
+    },
+    {
+      "id": "b23441e38e",
+      "kind": "note",
+      "name": "Taxa de rejeição histórica: 10%",
+      "x": 880,
+      "y": 340,
+      "description": "",
+      "params": {}
+    }
+  ],
+  "connections": [
+    {
+      "id": "6f3f95c4bb",
+      "kind": "flow",
+      "source": "961fab1167",
+      "target": "6d704d1ee6",
+      "label": "",
+      "probability": 1.0
+    },
+    {
+      "id": "21afb0cac1",
+      "kind": "flow",
+      "source": "6d704d1ee6",
+      "target": "08ace4e286",
+      "label": "",
+      "probability": 1.0
+    },
+    {
+      "id": "1cebf17a36",
+      "kind": "flow",
+      "source": "08ace4e286",
+      "target": "6f9eee6d72",
+      "label": "",
+      "probability": 1.0
+    },
+    {
+      "id": "2bfbb0efb4",
+      "kind": "flow",
+      "source": "6f9eee6d72",
+      "target": "719233efb5",
+      "label": "",
+      "probability": 1.0
+    },
+    {
+      "id": "1629154f2c",
+      "kind": "flow",
+      "source": "719233efb5",
+      "target": "f0482416dc",
+      "label": "",
+      "probability": 0.9
+    },
+    {
+      "id": "8c1e47ace1",
+      "kind": "flow",
+      "source": "719233efb5",
+      "target": "5fc50d7aa8",
+      "label": "",
+      "probability": 0.1
+    },
+    {
+      "id": "c85adcd53c",
+      "kind": "flow",
+      "source": "5fc50d7aa8",
+      "target": "6f9eee6d72",
+      "label": "",
+      "probability": 1.0
+    },
+    {
+      "id": "ff2ae550c7",
+      "kind": "resource",
+      "source": "44cfb8f96c",
+      "target": "6d704d1ee6",
+      "label": "",
+      "probability": 1.0
+    },
+    {
+      "id": "59c01c78a9",
+      "kind": "resource",
+      "source": "34cf2ad365",
+      "target": "08ace4e286",
+      "label": "",
+      "probability": 1.0
+    },
+    {
+      "id": "04fd34358d",
+      "kind": "resource",
+      "source": "ec49ddf286",
+      "target": "6f9eee6d72",
+      "label": "",
+      "probability": 1.0
+    },
+    {
+      "id": "c6f9c616c2",
+      "kind": "control",
+      "source": "8aecd87dea",
+      "target": "6d704d1ee6",
+      "label": "",
+      "probability": 1.0
+    },
+    {
+      "id": "f913966561",
+      "kind": "note",
+      "source": "b23441e38e",
+      "target": "719233efb5",
+      "label": "",
+      "probability": 1.0
+    }
+  ]
+}
