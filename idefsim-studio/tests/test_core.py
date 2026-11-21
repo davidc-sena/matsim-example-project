@@ -83,3 +83,31 @@ def test_resource_below_control_above():
     torno.y = 0  # acima da função
     msgs = [i for i in validate(m) if "notação IDEF-SIM" in i.message]
     assert len(msgs) == 1 and msgs[0].level == INFO
+
+
+def test_entry_flow():
+    m = Model()
+    e = m.add_element(EK.ENTITY, interarrival="CONST(5)")
+    f = m.add_element(EK.FUNCTION, duration="CONST(1)")
+    x = m.add_element(EK.EXIT)
+    with pytest.raises(ConnectionError_):
+        m.add_connection(CK.ENTRY, f.id, x.id)       # só parte de entidade
+    m.add_connection(CK.FLOW, e.id, f.id)
+    with pytest.raises(ConnectionError_):
+        m.add_connection(CK.ENTRY, e.id, f.id)       # duplicado (fluxo já existe)
+    m.connections.clear()
+    m.add_connection(CK.ENTRY, e.id, f.id)
+    m.add_connection(CK.FLOW, f.id, x.id)
+    assert len(m.outgoing(e.id)) == 1                 # ENTRY conta como fluxo
+    assert not [i for i in validate(m) if "Fluxo de entrada" in i.message]
+    m.settings.duration, m.settings.replications = 100, 1
+    rows = {(r.obj, r.metric): r.mean for r in run_simulation(m).rows()}
+    assert rows[("Fim 1", "Entidades")] >= 19
+
+
+def test_entry_suggested_for_plain_flow():
+    m = Model()
+    e = m.add_element(EK.ENTITY)
+    f = m.add_element(EK.FUNCTION)
+    m.add_connection(CK.FLOW, e.id, f.id)
+    assert [i for i in validate(m) if "Fluxo de entrada no sistema" in i.message]

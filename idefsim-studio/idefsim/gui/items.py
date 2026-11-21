@@ -7,11 +7,12 @@ from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QColor, QFont, QPainterPath, QPainterPathStroker, QPen
 from PySide6.QtWidgets import QGraphicsItem
 
-from ..model import (Connection, ConnectionKind as CK, Element, ElementKind as EK,
+from ..model import (FLOW_LIKE, Connection, ConnectionKind as CK, Element, ElementKind as EK,
                      PROCESS_KINDS, RULE_KINDS)
 from . import shapes
 
 GRID = 10
+MIN_SEGMENT = 14  # comprimento mínimo visível de uma seta (cabe a ponta)
 
 
 class NodeItem(QGraphicsItem):
@@ -129,7 +130,8 @@ class EdgeItem(QGraphicsItem):
         src.edges.append(self)
         dst.edges.append(self)
         self.setFlag(QGraphicsItem.ItemIsSelectable)
-        self.setZValue(0)
+        # acima dos símbolos, para a ponta nunca ficar escondida atrás de um elemento vizinho
+        self.setZValue(2)
         self.points: list[QPointF] = [QPointF(), QPointF()]
         self.adjust()
 
@@ -141,7 +143,7 @@ class EdgeItem(QGraphicsItem):
     def label_text(self) -> str:
         c = self.conn
         parts = [c.label] if c.label else []
-        if c.kind == CK.FLOW:
+        if c.kind in FLOW_LIKE:
             src = self.model.elements[c.source]
             n_out = len(self.model.outgoing(src.id))
             if (src.kind in (EK.RULE_OR, EK.RULE_ANDOR) or
@@ -171,14 +173,19 @@ class EdgeItem(QGraphicsItem):
                        _route_from_below(_flip(src), _flip(body), tx)]
             self.points = pts
         else:
-            self.points = [self.src.boundary_point(self.dst.scenePos()),
-                           self.dst.boundary_point(self.src.scenePos())]
+            a = self.src.boundary_point(self.dst.scenePos())
+            b = self.dst.boundary_point(self.src.scenePos())
+            # Elementos muito próximos ou sobrepostos (ex.: regra encostada na função):
+            # garante um troço mínimo no sentido origem→destino para a ponta ficar visível.
+            cs, ct = self.src.scenePos(), self.dst.scenePos()
+            dx, dy = ct.x() - cs.x(), ct.y() - cs.y()
+            dist = math.hypot(dx, dy)
+            if dist > 0:
+                ux, uy = dx / dist, dy / dist
+                if (b.x() - a.x()) * ux + (b.y() - a.y()) * uy < MIN_SEGMENT:
+                    a = QPointF(b.x() - ux * MIN_SEGMENT, b.y() - uy * MIN_SEGMENT)
+            self.points = [a, b]
         self.update()
-
-    def is_entry(self) -> bool:
-        s = self.model.elements.get(self.conn.source)
-        return (self.conn.kind == CK.FLOW and s is not None and s.kind == EK.ENTITY
-                and not self.model.incoming(s.id))
 
     def _path(self) -> QPainterPath:
         p = QPainterPath(self.points[0])
@@ -198,7 +205,7 @@ class EdgeItem(QGraphicsItem):
         if self._path().length() < 2:
             return
         color = shapes.SELECT if self.isSelected() else shapes.INK
-        shapes.draw_link(painter, self.conn.kind, self.points, color, entry=self.is_entry())
+        shapes.draw_link(painter, self.conn.kind, self.points, color)
         txt = self.label_text()
         if txt:
             k = len(self.points) // 2

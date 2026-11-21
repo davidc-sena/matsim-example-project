@@ -22,7 +22,7 @@ def usinagem_inspecao() -> Model:
     fim = m.add_element(EK.EXIT, 860, 200, "Expedição")
     retr = m.add_element(EK.FUNCTION, 720, 420, "Retrabalhar", duration="EXPO(8)")
     nota = m.add_element(EK.NOTE, 880, 80, "Taxa de rejeição histórica: 10%")
-    m.add_connection(CK.FLOW, peca.id, usin.id)
+    m.add_connection(CK.ENTRY, peca.id, usin.id)
     m.add_connection(CK.FLOW, usin.id, mov.id)
     m.add_connection(CK.FLOW, mov.id, insp.id)
     m.add_connection(CK.FLOW, insp.id, regra.id)
@@ -50,7 +50,9 @@ def montagem() -> Model:
     mont = m.add_element(EK.FUNCTION, 620, 210, "Montar", duration="NORM(3.5, 0.4)")
     mont_r = m.add_element(EK.RESOURCE, 620, 330, "Montador", capacity=1)
     fim = m.add_element(EK.EXIT, 780, 210, "Armazém")
-    for a, b in ((base, pb), (tampa, pt), (pb, j), (pt, j), (j, prod), (prod, mont), (mont, fim)):
+    m.add_connection(CK.ENTRY, base.id, pb.id)
+    m.add_connection(CK.ENTRY, tampa.id, pt.id)
+    for a, b in ((pb, j), (pt, j), (j, prod), (prod, mont), (mont, fim)):
         m.add_connection(CK.FLOW, a.id, b.id)
     m.add_connection(CK.RESOURCE, mont_r.id, mont.id)
     return m

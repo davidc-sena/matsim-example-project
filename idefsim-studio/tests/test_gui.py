@@ -59,3 +59,34 @@ def test_load_example_and_export(app, tmp_path):
     assert win.svg_bytes().startswith(b"<?xml")
     assert not win.image().isNull()
     win.close()
+
+
+def test_arrowhead_visible_when_rule_touches_function(app):
+    from idefsim.model import Model
+    m = Model()
+    f = m.add_element(EK.FUNCTION, 0, 0)
+    r = m.add_element(EK.RULE_OR, 80, 0)   # regra sobreposta à função
+    m.add_connection(CK.FLOW, f.id, r.id)
+    win = MainWindow()
+    win._set_model(m, None)
+    ed = next(iter(win.scene.edges.values()))
+    a, b = ed.points
+    assert b.x() - a.x() >= 14 and ed.zValue() > win.scene.nodes[f.id].zValue()
+    win.dirty = False
+    win.close()
+
+
+def test_change_flow_to_entry(app):
+    from idefsim.model import Model
+    m = Model()
+    e = m.add_element(EK.ENTITY, 0, 0)
+    f = m.add_element(EK.FUNCTION, 200, 0)
+    c = m.add_connection(CK.FLOW, e.id, f.id)
+    win = MainWindow()
+    win._set_model(m, None)
+    assert win.scene.set_connection_kind(c.id, CK.ENTRY)
+    assert win.scene.model.connections[c.id].kind == CK.ENTRY
+    win.undo()
+    assert next(iter(win.scene.model.connections.values())).kind == CK.FLOW
+    win.dirty = False
+    win.close()

@@ -24,6 +24,7 @@ class _TextEdit(QPlainTextEdit):
 class PropertiesPanel(QScrollArea):
     edited = Signal(str, str)        # descrição, chave de agrupamento
     elementRenamed = Signal(str)     # id
+    kindChangeRequested = Signal(str, str)  # id da ligação, novo tipo
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -221,5 +222,14 @@ class PropertiesPanel(QScrollArea):
             self.elementRenamed.emit(c.source)
             self.edited.emit("Rótulo", f"{c.id}.label")
         self._line("Rótulo", c.label, set_label)
-        if c.kind == CK.FLOW and len(model.outgoing(c.source)) > 1 or s.kind == EK.RULE_ANDOR:
+        if c.kind in (CK.FLOW, CK.ENTRY) and s.kind == EK.ENTITY:
+            kind_box = QComboBox()
+            kinds = [CK.ENTRY, CK.FLOW]
+            for k in kinds:
+                kind_box.addItem(CONNECTION_LABELS[k])
+            kind_box.setCurrentIndex(kinds.index(c.kind))
+            kind_box.currentIndexChanged.connect(lambda i: self.kindChangeRequested.emit(c.id, kinds[i].value))
+            self.form.addRow("Tipo", kind_box)
+        if (c.kind in (CK.FLOW, CK.ENTRY) and len(model.outgoing(c.source)) > 1
+                or s.kind == EK.RULE_ANDOR):
             self._prob_row(model, c, "probabilidade")

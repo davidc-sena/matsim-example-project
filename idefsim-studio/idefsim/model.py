@@ -4,8 +4,9 @@ Notação IDEF-SIM (Leal, Almeida & Montevechi, 2008), elementos suportados:
 
 * Entidade ............................ círculo
 * Função .............................. retângulo
-* Recurso ............................. ligado à função por seta dupla
-* Controle ............................ ligado à função por seta tracejada
+* Fluxo de entrada no sistema ......... seta com dois traços na origem
+* Recurso ............................. abaixo da função, seta de baixo para cima
+* Controle ............................ acima da função, seta de cima para baixo
 * Movimentação ........................ seta larga (bloco)
 * Regras de fluxo: E (&), OU (X), E/OU (O)
 * Ponto final do sistema
@@ -36,6 +37,7 @@ class ElementKind(str, Enum):
 
 class ConnectionKind(str, Enum):
     FLOW = "flow"          # fluxo da entidade
+    ENTRY = "entry"        # fluxo de entrada no sistema modelado (entidade externa)
     RESOURCE = "resource"  # ligação recurso <-> função
     CONTROL = "control"    # controle -> função
     NOTE = "note"          # informação explicativa
@@ -57,11 +59,13 @@ KIND_LABELS: dict[ElementKind, str] = {
 
 CONNECTION_LABELS: dict[ConnectionKind, str] = {
     ConnectionKind.FLOW: "Fluxo da entidade",
+    ConnectionKind.ENTRY: "Fluxo de entrada no sistema",
     ConnectionKind.RESOURCE: "Ligação de recurso",
     ConnectionKind.CONTROL: "Ligação de controle",
     ConnectionKind.NOTE: "Ligação de nota",
 }
 
+FLOW_LIKE = {ConnectionKind.FLOW, ConnectionKind.ENTRY}
 RULE_KINDS = {ElementKind.RULE_AND, ElementKind.RULE_OR, ElementKind.RULE_ANDOR}
 PROCESS_KINDS = {ElementKind.FUNCTION, ElementKind.MOVEMENT}
 FLOW_SOURCES = {ElementKind.ENTITY, ElementKind.CONNECTOR} | PROCESS_KINDS | RULE_KINDS
@@ -211,7 +215,12 @@ class Model:
         if source == target:
             raise ConnectionError_("Não é possível ligar um elemento a ele mesmo.")
         s, t = self.elements[source], self.elements[target]
-        if kind == ConnectionKind.FLOW:
+        if kind == ConnectionKind.ENTRY:
+            if s.kind != ElementKind.ENTITY:
+                raise ConnectionError_("O fluxo de entrada no sistema deve partir de uma Entidade.")
+            if t.kind not in FLOW_TARGETS - {ElementKind.ENTITY, ElementKind.EXIT}:
+                raise ConnectionError_(f"O fluxo de entrada não pode chegar a '{KIND_LABELS[t.kind]}'.")
+        elif kind == ConnectionKind.FLOW:
             if s.kind not in FLOW_SOURCES:
                 raise ConnectionError_(f"Um fluxo não pode partir de '{KIND_LABELS[s.kind]}'.")
             if t.kind not in FLOW_TARGETS:
@@ -232,7 +241,8 @@ class Model:
             if s.kind != ElementKind.NOTE:
                 raise ConnectionError_("A ligação de nota deve partir de uma Informação explicativa.")
         for c in self.connections.values():
-            if c.kind == kind and c.source == s.id and c.target == t.id:
+            same = c.kind == kind or (c.kind in FLOW_LIKE and kind in FLOW_LIKE)
+            if same and c.source == s.id and c.target == t.id:
                 raise ConnectionError_("Esta ligação já existe.")
         return s.id, t.id
 
@@ -243,11 +253,18 @@ class Model:
         self.connections[c.id] = c
         return c
 
+    @staticmethod
+    def _kinds(kind: ConnectionKind) -> set:
+        # FLOW inclui o fluxo de entrada: ambos transportam entidades
+        return FLOW_LIKE if kind in FLOW_LIKE else {kind}
+
     def outgoing(self, element_id: str, kind: ConnectionKind = ConnectionKind.FLOW) -> list[Connection]:
-        return [c for c in self.connections.values() if c.source == element_id and c.kind == kind]
+        ks = self._kinds(kind)
+        return [c for c in self.connections.values() if c.source == element_id and c.kind in ks]
 
     def incoming(self, element_id: str, kind: ConnectionKind = ConnectionKind.FLOW) -> list[Connection]:
-        return [c for c in self.connections.values() if c.target == element_id and c.kind == kind]
+        ks = self._kinds(kind)
+        return [c for c in self.connections.values() if c.target == element_id and c.kind in ks]
 
     def resources_of(self, element_id: str) -> list[Element]:
         return [self.elements[c.source] for c in self.incoming(element_id, ConnectionKind.RESOURCE)]
